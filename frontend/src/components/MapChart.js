@@ -2,12 +2,12 @@ import React, { useState } from 'react'
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps'
 
 const WORLD_GEO_URL = 
-    'https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json'
+  'https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json'
 const SELECTED_GEO_FILL = '#FFA500'
 
 export default function MapChart() {
   const [selectedGeoId, setSelectedGeoId] = useState()
-  const [selectedGeoName, setSelectedGeoName] = useState()
+  const [selectedGeoName, setSelectedGeoName] = useState('Select a country')
 
   return (
     <>
@@ -23,11 +23,16 @@ export default function MapChart() {
                 strokeWidth={.25}
                 style={{
                   default: {
-                    fillOpacity: selectedGeoId === geo.id ? 1 : 0
+                    fillOpacity: selectedGeoId === geo.id ? 1 : 0,
+                    outline: 'none'
                   }, 
                   hover: {
-                    fillOpacity: .75
+                    fillOpacity: .75,
+                    outline: 'none'
                   },
+                  pressed: {
+                    outline: 'none'
+                  }
                 }}
                 fill={SELECTED_GEO_FILL} 
                 onClick={_ => {
