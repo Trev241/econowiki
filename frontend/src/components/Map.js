@@ -7,6 +7,7 @@ const WORLD_GEO_URL =
 
 export default function Map() {
   const { id } = useParams();
+
   return (
     <>
       <h1 className='text-center display-1'>{id}</h1>

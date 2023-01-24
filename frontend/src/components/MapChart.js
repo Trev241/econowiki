@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps'
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 const WORLD_GEO_URL = 
   'https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json'
@@ -8,9 +8,10 @@ const SELECTED_GEO_FILL = '#FFA500'
 
 export default function MapChart() {
   const [selectedGeo, setSelectedGeo] = useState({
-    id: "",
-    name: "Select a country"
+    id: '',
+    name: 'Select a country'
   })
+
   const navigate = useNavigate()
 
   return (
@@ -18,7 +19,7 @@ export default function MapChart() {
       <h1 className='text-center display-1'>{selectedGeo.name}</h1>
       <ComposableMap>
         <Geographies geography={WORLD_GEO_URL}>
-          {({ geographies }) =>
+          {({ geographies }) => 
             geographies.map((geo) => (
               <Geography 
                 key={geo.rsmKey} 
@@ -39,15 +40,11 @@ export default function MapChart() {
                   }
                 }}
                 fill={SELECTED_GEO_FILL} 
-                onClick={_ => {
-                  navigate(`/${selectedGeo.id}`)
-                }}
-                onMouseEnter={_ => {
-                  setSelectedGeo({
+                onClick={_ => navigate(`/${selectedGeo.id}`)}
+                onMouseEnter={_ => setSelectedGeo({
                     id: geo.id,
                     name: geo.properties.name
-                  })
-                }}
+                })}
               />
             ))
           }

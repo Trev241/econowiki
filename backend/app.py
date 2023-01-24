@@ -7,14 +7,41 @@ from flask_restful import Api, Resource
 app = Flask(__name__)
 api = Api(app)
 
+# ----------------------------------
 # Reading data from CSV file
 # TODO: Maybe change to SQL database 
-INCOMES = pd.read_csv('data/incomes.csv')
-INCOMES.set_index(['Country'], inplace=True)
+# ----------------------------------
+RESOURCES = {
+    'INCOME_INDEX': 'income_index.csv', 
+    'CAPITAL': 'capital_formation.csv', 
+    'DOMESTIC_CREDITS': 'domestic_credits.csv', 
+    'GDP_PER_CAPITA': 'gdp_per_capita.csv', 
+    'GDP': 'gdp.csv', 
+    'GNI_FEMALE': 'gni_female.csv', 
+    'GNI MALE': 'gni_male.csv', 
+    'GNI_PER_CAPITA': 'gni_per_capita.csv', 
+    'LABOUR_SHARE': 'labour_share.csv'
+}
+
+DATA = dict()
+
+for name, resource in RESOURCES.items():
+    print(f'Reading {name} from resource: {resource}...')
+    
+    data = pd.read_csv(f'data/{resource}')
+    data.set_index(['Country'], inplace=True)
+
+    DATA[name] = data
 
 class Country(Resource):
     def get(self, country_code):
-        return json.loads(INCOMES.loc[country_code].to_json())
+        response = dict()
+        
+        for resource_name in RESOURCES.keys():
+            # TODO: Ignore favicon.ico GET requests
+            response[resource_name] = DATA[resource_name].loc[country_code].to_dict()
+        
+        return response
 
 api.add_resource(Country, '/<string:country_code>')
 
