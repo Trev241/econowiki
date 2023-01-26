@@ -40,8 +40,8 @@ export default function MapChart() {
                   },
                 }}
                 fill={SELECTED_GEO_FILL}
-                onClick={(_) => navigate(`/${selectedGeo.id}`)}
-                onMouseEnter={(_) =>
+                onClick={() => navigate(`/${selectedGeo.id}`)}
+                onMouseEnter={() =>
                   setSelectedGeo({
                     id: geo.id,
                     name: geo.properties.name,
