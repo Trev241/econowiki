@@ -1,5 +1,6 @@
 # SCRIPT TO INITIALIZE DATABASE
 
+import re
 import pandas as pd
 import sqlite3
 
@@ -49,6 +50,23 @@ conn.execute(command)
 
 # TODO: Inserting data about all countries
 
+file = open('data/Countries.txt','r')
+read = file.readlines()
+countries = list()
+for line in read:
+    Countries = re.search("[A-Z].+",line)
+   
+    x = re.split(",",Countries.group())
+    
+    UNcode = x[3]
+    Alpha2 = x[1]
+    Alpha3 = x[2]
+    Name  = x[0]
+
+    command = f'INSERT INTO country (un_code,iso_alpha_2_code,iso_alpha_3_code,name) VALUES("{UNcode}", "{Alpha2}", "{Alpha3}", "{Name}")'
+    conn.execute(command)
+
+
 # Preparing data about all economic income indicators
 indicators = [
     '"GFCF", "Gross Fixed Capital Formation", "The acquisition of produced assets (including purchases of second-hand assets), including the production of such assets by producers for their own use, minus disposals."',
@@ -92,7 +110,7 @@ for name, file in RESOURCES.items():
     cur.execute(f'SELECT id FROM economic_indicator WHERE short_name="{name}"')
     indicator_id = cur.fetchone()[0]
 
-    years = data.columns
+    years = data.columns[1:]
 
     for row in data.itertuples():
         # Fetch country id
@@ -102,10 +120,18 @@ for name, file in RESOURCES.items():
         if matches:
             country_id = matches[0]
             # Prepare values as list
-            values += ((country_id, indicator_id, year, row[year]) for year in years)
+            # values += ((country_id, indicator_id, int(year), float(row[i+1])) for i, year in enumerate(years))
+            for i,year in enumerate(years):
+                try:
+                    value = float(row[i+1])
+                    values = f'{country_id},{indicator_id},{int(year)},{value}'
+                    # Insert values
+                    command = f'INSERT INTO country_indicator_value (country_id, indicator_id, year, value) VALUES ({values})'
+                    conn.execute(command)
+                except Exception as e:
+                    print(e)
+
         else:
             print(f'Could not find ID for {row[0]}! Data excluded from migration')
 
-# Insert values
-command = f'INSERT INTO country_indicator_value (country_id, indicator_id, year, value) VALUES ({values})'
-conn.execute(command)
+conn.commit()
