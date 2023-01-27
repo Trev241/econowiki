@@ -3,8 +3,10 @@ import pandas as pd
 
 from flask import Flask
 from flask_restful import Api, Resource
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"*": {"origins": "*"}})
 api = Api(app)
 
 # ----------------------------------
@@ -39,9 +41,9 @@ class Country(Resource):
         
         for resource_name in RESOURCES.keys():
             # TODO: Ignore favicon.ico GET requests
-            response[resource_name] = DATA[resource_name].loc[country_code].to_dict()
+            response[resource_name] = DATA[resource_name].loc[country_code].to_json()
         
-        return response
+        return json.dumps(response)
 
 api.add_resource(Country, '/<string:country_code>')
 
