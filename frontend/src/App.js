@@ -1,13 +1,12 @@
-import "./App.css";
-import MapChart from "./components/MapChart";
-import Country from "./components/Country";
+import Home from "./pages/Home";
+import Country from "./pages/Country";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route index element={<MapChart />} />
+        <Route index element={<Home />} />
         <Route path=":id" element={<Country />} />
       </Routes>
     </BrowserRouter>

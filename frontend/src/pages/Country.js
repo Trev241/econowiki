@@ -6,7 +6,7 @@ import {
   Geography,
   ZoomableGroup,
 } from "react-simple-maps";
-import CountryStats from "./CountryStats";
+import CountryInfo from "../components/CountryInfo";
 
 const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
@@ -20,33 +20,20 @@ export default function Country() {
 
   return (
     <>
-      <div
-        style={{
-          padding: "1rem",
-        }}
-      >
+      <div className="p-4">
         <Link
           to={"/"}
-          style={{
-            padding: "10px 15px",
-            border: "none",
-            textDecoration: "none",
-            backgroundColor: "rgb(230, 230, 230)",
-            color: "black",
-          }}
+          className="px-3 py-2 border-0 text-dark text-decoration-none bg-light"
         >
           {"<"}
         </Link>
       </div>
-      <div
-        style={{
-          display: "flex",
-        }}
-      >
+      <div className="d-flex" style={{ padding: "1rem 4rem" }}>
         <div
+          className="w-50 border"
           style={{
-            width: "50%",
-            height: "100vh",
+            height: "80vh",
+            cursor: "grab",
           }}
         >
           <ComposableMap projection="geoMercator">
@@ -84,25 +71,11 @@ export default function Country() {
             </ZoomableGroup>
           </ComposableMap>
         </div>
-        <div
-          style={{
-            width: "50%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <span
-            style={{
-              fontWeight: "bold",
-              fontSize: "5rem",
-            }}
-          >
-            {params.id}
-          </span>
+        <div className="w-50 d-flex justify-content-center align-items-center">
+          <span className="display-4">{params.id}</span>
         </div>
       </div>
-      <CountryStats id={params.id} />
+      <CountryInfo id={params.id} />
     </>
   );
 }

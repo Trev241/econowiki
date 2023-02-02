@@ -1,25 +1,8 @@
 export default function Chart({ name, description, chart, styles = {} }) {
   return (
-    <div
-      style={{
-        padding: "1rem",
-        ...styles,
-      }}
-    >
-      <div
-        style={{
-          marginBottom: "1rem",
-          textAlign: "center",
-        }}
-      >
-        <span
-          style={{
-            fontWeight: "bold",
-            fontSize: "2rem",
-          }}
-        >
-          {name}
-        </span>
+    <div className="p-4" style={styles}>
+      <div className="mb-4 text-center">
+        <span className="h3">{name}</span>
         <br />
         <span
           style={{

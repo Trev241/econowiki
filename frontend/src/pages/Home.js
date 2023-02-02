@@ -6,7 +6,7 @@ const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
 const SELECTED_GEO_FILL = "#FFA500";
 
-export default function MapChart() {
+export default function Home() {
   const [selectedGeo, setSelectedGeo] = useState({
     id: "",
     name: "Select a country",

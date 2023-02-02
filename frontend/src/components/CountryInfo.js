@@ -21,7 +21,7 @@ import {
 import { mergeData } from "../utils";
 import Chart from "./Chart";
 
-export default function CountryStats({ id }) {
+export default function CountryInfo({ id }) {
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -55,12 +55,7 @@ export default function CountryStats({ id }) {
   }
 
   return (
-    <div
-      style={{
-        padding: "1rem",
-        display: "flex",
-      }}
-    >
+    <div className="p-4 d-flex">
       <div>
         <Chart
           name={"INCOME INDEX"}
@@ -146,7 +141,7 @@ export default function CountryStats({ id }) {
       </div>
       <div
         style={{
-          transform: "translate(0px, 250px)",
+          marginTop: "200px",
         }}
       >
         <Chart
