@@ -30,7 +30,7 @@ DATA = dict()
 for name, resource in RESOURCES.items():
     print(f'Reading {name} from resource: {resource}...')
     
-    data = pd.read_csv(f'data/{resource}')
+    data = pd.read_csv(f'../data/{resource}')
     data.set_index(['Country'], inplace=True)
 
     DATA[name] = data

@@ -4,7 +4,7 @@ import re
 import pandas as pd
 import sqlite3
 
-conn = sqlite3.connect('country_statistics.db')
+conn = sqlite3.connect('../country_statistics.db')
 
 # ---------------
 # CREATING TABLES
@@ -50,7 +50,7 @@ conn.execute(command)
 
 # TODO: Inserting data about all countries
 
-file = open('data/Countries.txt','r')
+file = open('../data/Countries.txt','r')
 read = file.readlines()
 countries = list()
 for line in read:
@@ -101,7 +101,7 @@ RESOURCES = {
 values = list()
 
 for name, file in RESOURCES.items():
-    data = pd.read_csv(f'data/{file}')
+    data = pd.read_csv(f'../data/{file}')
     data.set_index(['Country'], inplace=True)
 
     cur = conn.cursor()

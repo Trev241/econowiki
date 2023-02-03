@@ -51,8 +51,18 @@ export default function CountryInfo({ id }) {
   }, [data]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="spinner-border" role="status" style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%"
+      }}>
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    );
   }
+
+  console.log(modData)
 
   return (
     <div className="p-4 d-flex">
