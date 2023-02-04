@@ -1,4 +1,5 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ComposableMap,
@@ -12,11 +13,88 @@ const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
 
 export default function Country() {
-  const [center, setCenter] = useState([0, 0]);
-  const [centered, setCentered] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [center, setCenter] = useState([0, 0]);
+  const [centered, setCentered] = useState();
+
+  const [info, setInfo] = useState({});
+  const [country, setCountry] = useState({});
+  const [indicators, setIndicators] = useState([]);
+  const [indicatorLoading, setIndicatorLoading] = useState(true);
+  const [countryLoading, setCountryLoading] = useState(true);
+  const [infoLoading, setInfoLoading] = useState(true);
+
+  const geoRef = useRef(null);
 
   const params = useParams();
+
+  useEffect(() => {
+    setCountryLoading(true);
+    setIndicatorLoading(true);
+    setInfoLoading(true);
+    axios
+      .get("http://localhost:5001/country/" + params.id)
+      .then(({ data }) => {
+        setCountry(data);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setCountryLoading(false);
+      });
+    axios
+      .get("http://localhost:5001/indicator")
+      .then(({ data }) => {
+        setIndicators(data);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setIndicatorLoading(false);
+      });
+
+    axios
+      .get("http://localhost:5001/value/" + params.id)
+      .then(({ data }) => {
+        setInfo(data);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setInfoLoading(false);
+      });
+  }, [params.id]);
+
+  useEffect(() => {
+    if (geoRef.current && !centered) {
+      // const ratio = window.innerWidth / window.innerHeight
+      // const width = Math.min(window.innerHeight * ratio, window.innerWidth)
+      // const height = Math.min(window.innerWidth / ratio, window.innerHeight)
+
+      const bounds = geoRef.current.path.bounds(geoRef.current.geo);
+      const boundsWidth = bounds[1][0] - bounds[0][0];
+      const boundsHeight = bounds[1][1] - bounds[0][1];
+
+      const zoom =
+        0.25 /
+        Math.max(
+          boundsWidth / window.innerWidth,
+          boundsHeight / window.innerHeight
+        );
+
+      // Adjust map to focus on selected country
+      setCenter(
+        geoRef.current.projection.invert(
+          geoRef.current.path.centroid(geoRef.current.geo)
+        )
+      );
+      setZoom(zoom);
+      setCentered(true);
+    }
+  });
 
   return (
     <>
@@ -28,7 +106,13 @@ export default function Country() {
           {"<"}
         </Link>
       </div>
-      <div className="d-flex" style={{ padding: "1rem 4rem" }}>
+      <div
+        className="d-flex"
+        style={{
+          padding: "1rem 4rem",
+          visibility: centered ? "visible" : "hidden",
+        }}
+      >
         <div
           className="w-50 border"
           style={{
@@ -38,33 +122,15 @@ export default function Country() {
         >
           <ComposableMap projection="geoMercator">
             <ZoomableGroup center={center} zoom={zoom}>
-              <Geographies geography={WORLD_GEO_URL}>
+              <Geographies
+                geography={WORLD_GEO_URL}
+                onLoad={() => {
+                  console.log("loaded");
+                }}
+              >
                 {({ geographies, projection, path }) => {
-                  const geo = geographies.find(
-                    (geo) => geo.properties.name === params.id
-                  );
-
-                  if (geo && !centered) {
-                    // const ratio = window.innerWidth / window.innerHeight
-                    // const width = Math.min(window.innerHeight * ratio, window.innerWidth)
-                    // const height = Math.min(window.innerWidth / ratio, window.innerHeight)
-
-                    const bounds = path.bounds(geo);
-                    const boundsWidth = bounds[1][0] - bounds[0][0];
-                    const boundsHeight = bounds[1][1] - bounds[0][1];
-
-                    const zoom =
-                      0.25 /
-                      Math.max(
-                        boundsWidth / window.innerWidth,
-                        boundsHeight / window.innerHeight
-                      );
-
-                    // Adjust map to focus on selected country
-                    setCenter(projection.invert(path.centroid(geo)));
-                    setCentered(true);
-                    setZoom(zoom);
-                  }
+                  const geo = geographies.find((geo) => geo.id === params.id);
+                  geoRef.current = { geo, projection, path };
                   return <Geography key={geo.rsmKey} geography={geo} />;
                 }}
               </Geographies>
@@ -72,10 +138,26 @@ export default function Country() {
           </ComposableMap>
         </div>
         <div className="w-50 d-flex justify-content-center align-items-center">
-          <span className="display-4">{params.id}</span>
+          <span className="display-4">
+            {countryLoading ? "" : country.name}
+          </span>
         </div>
       </div>
-      <CountryInfo id={params.id} />
+      {indicatorLoading || infoLoading ? (
+        <div
+          className="spinner-border"
+          role="status"
+          style={{
+            position: "absolute",
+            bottom: "50%",
+            left: "50%",
+          }}
+        >
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      ) : (
+        <CountryInfo info={info} indicators={indicators} />
+      )}
     </>
   );
 }

@@ -1,5 +1,4 @@
-import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -21,59 +20,23 @@ import {
 import { mergeData } from "../utils";
 import Chart from "./Chart";
 
-export default function CountryInfo({ id }) {
-  const [data, setData] = useState({});
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    setLoading(true);
-    axios
-      .get("http://localhost:5000/" + id)
-      .then(({ data }) => {
-        setData(JSON.parse(data));
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [id]);
-
+export default function CountryInfo({ info, indicators }) {
   const modData = useMemo(() => {
-    const result = {};
-    for (const key of Object.keys(data)) {
-      result[key] = [];
-      for (const _key of Object.keys(JSON.parse(data[key]))) {
-        result[key].push({
-          year: _key,
-          value: JSON.parse(data[key])[_key],
-        });
-      }
+    const result = [...Array(9)].map((_) => []);
+    for (const value of info) {
+      result[value.indicator_id - 1].push(value);
     }
     return result;
-  }, [data]);
-
-  if (loading) {
-    return (
-      <div className="spinner-border" role="status" style={{
-        position: "absolute",
-        top: "50%",
-        left: "50%"
-      }}>
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    );
-  }
-
-  console.log(modData)
+  }, [info]);
 
   return (
     <div className="p-4 d-flex">
       <div>
         <Chart
-          name={"INCOME INDEX"}
-          description={
-            "Pandas series is a One-dimensional ndarray with axis labels. The labels need not be unique but must be a hashable type."
-          }
+          name={indicators[8].name.toUpperCase()}
+          description={indicators[8].description}
           chart={
-            <LineChart width={600} height={300} data={modData["INCOME_INDEX"]}>
+            <LineChart width={600} height={300} data={modData[8]}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey={"year"} />
               <YAxis dataKey={"value"} />
@@ -83,16 +46,10 @@ export default function CountryInfo({ id }) {
           }
         />
         <Chart
-          name={"DOMESTIC CREDITS"}
-          description={
-            "Pandas series is a One-dimensional ndarray with axis labels. The labels need not be unique but must be a hashable type."
-          }
+          name={indicators[1].name.toUpperCase()}
+          description={indicators[1].description}
           chart={
-            <AreaChart
-              width={600}
-              height={300}
-              data={modData["DOMESTIC_CREDITS"]}
-            >
+            <AreaChart width={600} height={300} data={modData[1]}>
               <XAxis dataKey="year" />
               <YAxis dataKey="value" />
               <Area
@@ -107,34 +64,26 @@ export default function CountryInfo({ id }) {
           styles={{ marginTop: "200px" }}
         />
         <Chart
-          name={"GDP"}
-          description={
-            "Pandas series is a One-dimensional ndarray with axis labels. The labels need not be unique but must be a hashable type."
-          }
+          name={indicators[3].name.toUpperCase()}
+          description={indicators[3].description}
           chart={
             <ScatterChart width={600} height={300}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis dataKey="value" />
               <Tooltip />
-              <Scatter data={modData["GDP"]} fill="#222222" />
+              <Scatter data={modData[3]} fill="#222222" />
             </ScatterChart>
           }
           styles={{ marginTop: "200px" }}
         />
         <Chart
-          name={"LABOUR SHARE"}
-          description={
-            "Pandas series is a One-dimensional ndarray with axis labels. The labels need not be unique but must be a hashable type."
-          }
+          name={indicators[6].name.toUpperCase()}
+          description={indicators[6].description}
           chart={
             <FunnelChart width={600} height={400}>
               <Tooltip />
-              <Funnel
-                dataKey="value"
-                data={modData["LABOUR_SHARE"]}
-                isAnimationActive
-              >
+              <Funnel dataKey="value" data={modData[6]} isAnimationActive>
                 <LabelList
                   position="center"
                   fill="#FFFFFF"
@@ -155,12 +104,10 @@ export default function CountryInfo({ id }) {
         }}
       >
         <Chart
-          name={"CAPITAL"}
-          description={
-            "Pandas series is a One-dimensional ndarray with axis labels. The labels need not be unique but must be a hashable type."
-          }
+          name={indicators[0].name.toUpperCase()}
+          description={indicators[0].description}
           chart={
-            <BarChart width={600} height={300} data={modData["CAPITAL"]}>
+            <BarChart width={600} height={300} data={modData[0]}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis dataKey="value" />
@@ -170,25 +117,15 @@ export default function CountryInfo({ id }) {
           }
         />
         <Chart
-          name={"GDP & GNI PER CAPITA"}
-          description={
-            "Pandas series is a One-dimensional ndarray with axis labels. The labels need not be unique but must be a hashable type."
-          }
+          name={indicators[2].name.toUpperCase()}
+          description={indicators[2].description}
           chart={
-            <BarChart
-              width={600}
-              height={300}
-              data={mergeData(
-                modData["GDP_PER_CAPITA"],
-                modData["GNI_PER_CAPITA"]
-              )}
-            >
+            <BarChart width={600} height={300} data={modData[2]}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
-              <YAxis dataKey="value1" />
+              <YAxis dataKey="value" />
               <Tooltip />
-              <Bar dataKey="value1" fill="#222222" />
-              <Bar dataKey="value2" fill="#FFA500" />
+              <Bar dataKey="value" fill="#FFA500" />
             </BarChart>
           }
           styles={{
@@ -196,15 +133,29 @@ export default function CountryInfo({ id }) {
           }}
         />
         <Chart
-          name={"GNI MALE & GNI FEMALE"}
-          description={
-            "Pandas series is a One-dimensional ndarray with axis labels. The labels need not be unique but must be a hashable type."
+          name={indicators[7].name.toUpperCase()}
+          description={indicators[7].description}
+          chart={
+            <BarChart width={600} height={300} data={modData[7]}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis dataKey="value" />
+              <Tooltip />
+              <Bar dataKey="value" fill="#222222" />
+            </BarChart>
           }
+          styles={{
+            marginTop: "200px",
+          }}
+        />
+        <Chart
+          name={`${indicators[4].short_name.toUpperCase()} & ${indicators[5].short_name.toUpperCase()}`}
+          description={indicators[4].description}
           chart={
             <LineChart
               width={600}
               height={300}
-              data={mergeData(modData["GNI MALE"], modData["GNI_FEMALE"])}
+              data={mergeData(modData[5], modData[4])}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey={"year"} />
