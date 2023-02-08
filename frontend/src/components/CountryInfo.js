@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -20,12 +20,16 @@ import {
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
+import Form from "react-bootstrap/Form";
 
 import { mergeData } from "../utils";
 import Chart from "./Chart";
 
 
 export default function CountryInfo({ info, indicators }) {
+  const [countries, setCountries] = useState()
+  const [otherCountries, setOtherCountries] = useState(new Set())
+
   const modData = useMemo(() => {
     const result = [...Array(9)].map((_) => []);
     for (const value of info) {
@@ -34,8 +38,57 @@ export default function CountryInfo({ info, indicators }) {
     return result;
   }, [info]);
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch("http://localhost:5001/country")
+        setCountries(await response.json())
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchData()
+  }, [countries])
+
+  const handleSelectChange = async (e) => {
+    if (!otherCountries.delete(e.target.value)) {
+      const newSet = new Set(otherCountries)
+      newSet.add(e.target.value)
+      setOtherCountries(newSet)
+
+      try {
+        const response = await fetch(`http://localhost:5001/country/${e.target.value}`)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    console.log(otherCountries)
+  }
+
   return (
     <Container>
+      {/* <Row className="my-3">
+        <h5>Choose a list of countries to compare against</h5>
+        <div>
+          <Form.Select 
+            className="me-2"
+            onChange={handleSelectChange}
+          >
+            <option>(Select a country)</option>
+            {countries && countries.map((country, i) => 
+              <option
+                key={i}
+                value={country.iso_alpha_3_code}
+              >
+                {`${country.name}${otherCountries.has(country.iso_alpha_3_code) ? "*" : ""}`}
+              </option>
+            )}
+          </Form.Select>
+        </div>  
+      </Row> */}
+
       <Row className="my-5">
         <Chart
           name={indicators[8].name.toUpperCase()}
@@ -51,6 +104,7 @@ export default function CountryInfo({ info, indicators }) {
           }
         />
       </Row>
+
       <Row className="mb-5">
         <Chart
           name={indicators[1].name.toUpperCase()}

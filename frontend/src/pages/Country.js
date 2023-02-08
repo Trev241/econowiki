@@ -37,8 +37,8 @@ export default function Country() {
     setCountryLoading(true);
     setIndicatorLoading(true);
     setInfoLoading(true);
-    axios
-      .get("http://localhost:5001/country/" + params.id)
+    
+    axios.get("http://localhost:5001/country/" + params.id)
       .then(({ data }) => {
         setCountry(data);
       })
@@ -48,8 +48,7 @@ export default function Country() {
       .finally(() => {
         setCountryLoading(false);
       });
-    axios
-      .get("http://localhost:5001/indicator")
+    axios.get("http://localhost:5001/indicator")
       .then(({ data }) => {
         setIndicators(data);
       })
@@ -60,8 +59,7 @@ export default function Country() {
         setIndicatorLoading(false);
       });
 
-    axios
-      .get("http://localhost:5001/value/" + params.id)
+    axios.get("http://localhost:5001/value/" + params.id)
       .then(({ data }) => {
         setInfo(data);
       })
@@ -103,7 +101,6 @@ export default function Country() {
 
   return (
     <>
-
       <Container>
         {/* <div className="p-4">
           <Link
@@ -113,35 +110,44 @@ export default function Country() {
             {"<"}
           </Link>
         </div> */}
-
-        <Row className="my-3">
-          <Col>
-            <Container fluid>
-              <h1 className="display-1">{country.name}</h1>
-            </Container>
-          </Col>
-          <Col xs={4}>
-            <Container fluid>
-              <ComposableMap className="border border-dark rounded" projection="geoMercator">
-                <ZoomableGroup center={center} zoom={zoom}>
-                  <Geographies
-                    geography={WORLD_GEO_URL}
-                    onLoad={() => {
-                      console.log("loaded");
-                    }}
-                  >
-                    {({ geographies, projection, path }) => {
-                      const geo = geographies.find((geo) => geo.id === params.id);
-                      geoRef.current = { geo, projection, path };
-                      return <Geography key={geo.rsmKey} geography={geo} />;
-                    }}
-                  </Geographies>
-                </ZoomableGroup>
-              </ComposableMap>
-            </Container>
-          </Col>
+      
+        <Row className="mt-5 mb-5 text-center">
+          {!countryLoading ? (
+            <>
+              <Col className="d-flex align-items-center">
+                <Container fluid>
+                  <h1 className="display-1">{country.name}</h1>
+                  <p className="lead">({country.iso_alpha_2_code}, {country.iso_alpha_3_code}, {country.un_code})</p>
+                </Container>
+              </Col>
+              <Col className="d-flex align-items-center" xs={4}>
+                <Container fluid>
+                  <ComposableMap className="border border-dark rounded" projection="geoMercator">
+                    <ZoomableGroup center={center} zoom={zoom}>
+                      <Geographies
+                        geography={WORLD_GEO_URL}
+                        onLoad={() => {
+                          console.log("loaded");
+                        }}
+                      >
+                        {({ geographies, projection, path }) => {
+                          const geo = geographies.find((geo) => geo.id === params.id);
+                          geoRef.current = { geo, projection, path };
+                          return <Geography key={geo.rsmKey} geography={geo} />;
+                        }}
+                      </Geographies>
+                    </ZoomableGroup>
+                  </ComposableMap>
+                </Container>
+              </Col>
+            </>
+          ) : (
+            <></>
+          )}
         </Row>
       </Container>
+
+      <hr className="my-5" />
 
       {indicatorLoading || infoLoading ? (
         <div

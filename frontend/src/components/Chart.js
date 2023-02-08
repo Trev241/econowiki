@@ -7,7 +7,7 @@ export default function Chart({ name, description, chart, styles = {} }) {
   return (
     <Container style={styles}>
       <h1 className="display-6">{name}</h1>
-      <p className="lead">{description}</p>
+      <p className="lead mb-4">{description}</p>
 
       <ResponsiveContainer aspect={3/1}>
         {chart}

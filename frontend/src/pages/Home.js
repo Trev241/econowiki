@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { useNavigate } from "react-router-dom";
 
@@ -16,8 +16,18 @@ export default function Home() {
     id: "",
     name: "Select a country",
   });
+  const [countries, setCountries] = useState()
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch("http://localhost:5001/country")
+      setCountries(await response.json())
+    }
+
+    fetchData()
+  }, [countries])
 
   return (
     <>
@@ -36,25 +46,31 @@ export default function Home() {
         <Row>
           <Col sm={3}>
             <Container fluid>
-              <Row className="mb-3">
-                <Col>
-                  <h1 className="display-1">{selectedGeo.name}</h1>
-                </Col>
-              </Row>
-
               <Row>
                 <Col>
-                  <Form.Select className="mb-3" aria-label="Select a country">
-                    <option>-Select a country-</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
+                  <Form.Select 
+                    className="mb-3"
+                    value={selectedGeo.id} 
+                    aria-label="Select a country"
+                    onChange={(e) => navigate(`/${e.target.value}`)}
+                  >
+                    <option>(Select a country)</option>
+                    {countries && countries.map((country, i) => 
+                      <option 
+                        key={i}
+                        value={country.iso_alpha_3_code}
+                      >
+                        {country.name}
+                      </option>
+                    )}
                   </Form.Select>
                 </Col>
               </Row>
 
-              <Row>
-                {console.log(selectedGeo)}
+              <Row className="mb-3">
+                <Col>
+                  <h1 className="display-1">{selectedGeo.name}</h1>
+                </Col>
               </Row>
 
             </Container>
