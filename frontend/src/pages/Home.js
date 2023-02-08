@@ -45,7 +45,7 @@ export default function Home() {
               <Row>
                 <Col>
                   <Form.Select className="mb-3" aria-label="Select a country">
-                    <option>--Select a country---</option>
+                    <option>-Select a country-</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
                     <option value="3">Three</option>

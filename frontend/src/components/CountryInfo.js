@@ -36,7 +36,7 @@ export default function CountryInfo({ info, indicators }) {
 
   return (
     <Container>
-      <Row className="my-3">
+      <Row className="my-5">
         <Chart
           name={indicators[8].name.toUpperCase()}
           description={indicators[8].description}
@@ -51,7 +51,7 @@ export default function CountryInfo({ info, indicators }) {
           }
         />
       </Row>
-      <Row className="mb-3">
+      <Row className="mb-5">
         <Chart
           name={indicators[1].name.toUpperCase()}
           description={indicators[1].description}
@@ -70,7 +70,7 @@ export default function CountryInfo({ info, indicators }) {
           }
         />
       </Row>
-      <Row className="mb-3">
+      <Row className="mb-5">
         <Chart
           name={indicators[3].name.toUpperCase()}
           description={indicators[3].description}
@@ -85,7 +85,7 @@ export default function CountryInfo({ info, indicators }) {
           }
         />
       </Row>
-      <Row className="mb-3">
+      <Row className="mb-5">
         <Chart
           name={indicators[6].name.toUpperCase()}
           description={indicators[6].description}
@@ -104,7 +104,7 @@ export default function CountryInfo({ info, indicators }) {
           }
         />
       </Row>
-      <Row className="mb-3">
+      <Row className="mb-5">
         <Chart
           name={indicators[0].name.toUpperCase()}
           description={indicators[0].description}
@@ -119,7 +119,7 @@ export default function CountryInfo({ info, indicators }) {
           }
         />
       </Row>
-      <Row className="mb-3">
+      <Row className="mb-5">
         <Chart
           name={indicators[2].name.toUpperCase()}
           description={indicators[2].description}
@@ -134,7 +134,7 @@ export default function CountryInfo({ info, indicators }) {
           }
         />
       </Row>
-      <Row className="mb-3">
+      <Row className="mb-5">
         <Chart
           name={indicators[7].name.toUpperCase()}
           description={indicators[7].description}
@@ -149,7 +149,7 @@ export default function CountryInfo({ info, indicators }) {
           }
         />
       </Row>
-      <Row className="mb-3">
+      <Row className="mb-5">
         <Chart
           name={`${indicators[4].short_name.toUpperCase()} & ${indicators[5].short_name.toUpperCase()}`}
           description={indicators[4].description}
