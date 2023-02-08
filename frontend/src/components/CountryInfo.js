@@ -17,8 +17,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+
 import { mergeData } from "../utils";
 import Chart from "./Chart";
+
 
 export default function CountryInfo({ info, indicators }) {
   const modData = useMemo(() => {
@@ -30,13 +35,13 @@ export default function CountryInfo({ info, indicators }) {
   }, [info]);
 
   return (
-    <div className="p-4 d-flex">
-      <div>
+    <Container>
+      <Row className="my-3">
         <Chart
           name={indicators[8].name.toUpperCase()}
           description={indicators[8].description}
           chart={
-            <LineChart width={600} height={300} data={modData[8]}>
+            <LineChart data={modData[8]}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey={"year"} />
               <YAxis dataKey={"value"} />
@@ -45,11 +50,13 @@ export default function CountryInfo({ info, indicators }) {
             </LineChart>
           }
         />
+      </Row>
+      <Row className="mb-3">
         <Chart
           name={indicators[1].name.toUpperCase()}
           description={indicators[1].description}
           chart={
-            <AreaChart width={600} height={300} data={modData[1]}>
+            <AreaChart data={modData[1]}>
               <XAxis dataKey="year" />
               <YAxis dataKey="value" />
               <Area
@@ -61,13 +68,14 @@ export default function CountryInfo({ info, indicators }) {
               <Tooltip />
             </AreaChart>
           }
-          styles={{ marginTop: "200px" }}
         />
+      </Row>
+      <Row className="mb-3">
         <Chart
           name={indicators[3].name.toUpperCase()}
           description={indicators[3].description}
           chart={
-            <ScatterChart width={600} height={300}>
+            <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis dataKey="value" />
@@ -75,13 +83,14 @@ export default function CountryInfo({ info, indicators }) {
               <Scatter data={modData[3]} fill="#222222" />
             </ScatterChart>
           }
-          styles={{ marginTop: "200px" }}
         />
+      </Row>
+      <Row className="mb-3">
         <Chart
           name={indicators[6].name.toUpperCase()}
           description={indicators[6].description}
           chart={
-            <FunnelChart width={600} height={400}>
+            <FunnelChart>
               <Tooltip />
               <Funnel dataKey="value" data={modData[6]} isAnimationActive>
                 <LabelList
@@ -93,21 +102,14 @@ export default function CountryInfo({ info, indicators }) {
               </Funnel>
             </FunnelChart>
           }
-          styles={{
-            marginTop: "200px",
-          }}
         />
-      </div>
-      <div
-        style={{
-          marginTop: "200px",
-        }}
-      >
+      </Row>
+      <Row className="mb-3">
         <Chart
           name={indicators[0].name.toUpperCase()}
           description={indicators[0].description}
           chart={
-            <BarChart width={600} height={300} data={modData[0]}>
+            <BarChart data={modData[0]}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis dataKey="value" />
@@ -116,11 +118,13 @@ export default function CountryInfo({ info, indicators }) {
             </BarChart>
           }
         />
+      </Row>
+      <Row className="mb-3">
         <Chart
           name={indicators[2].name.toUpperCase()}
           description={indicators[2].description}
           chart={
-            <BarChart width={600} height={300} data={modData[2]}>
+            <BarChart data={modData[2]}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis dataKey="value" />
@@ -128,15 +132,14 @@ export default function CountryInfo({ info, indicators }) {
               <Bar dataKey="value" fill="#FFA500" />
             </BarChart>
           }
-          styles={{
-            marginTop: "200px",
-          }}
         />
+      </Row>
+      <Row className="mb-3">
         <Chart
           name={indicators[7].name.toUpperCase()}
           description={indicators[7].description}
           chart={
-            <BarChart width={600} height={300} data={modData[7]}>
+            <BarChart data={modData[7]}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis dataKey="value" />
@@ -144,19 +147,14 @@ export default function CountryInfo({ info, indicators }) {
               <Bar dataKey="value" fill="#222222" />
             </BarChart>
           }
-          styles={{
-            marginTop: "200px",
-          }}
         />
+      </Row>
+      <Row className="mb-3">
         <Chart
           name={`${indicators[4].short_name.toUpperCase()} & ${indicators[5].short_name.toUpperCase()}`}
           description={indicators[4].description}
           chart={
-            <LineChart
-              width={600}
-              height={300}
-              data={mergeData(modData[5], modData[4])}
-            >
+            <LineChart data={mergeData(modData[5], modData[4])}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey={"year"} />
               <YAxis dataKey={"value1"} />
@@ -176,11 +174,8 @@ export default function CountryInfo({ info, indicators }) {
               <Legend align="right" verticalAlign="top" />
             </LineChart>
           }
-          styles={{
-            marginTop: "200px",
-          }}
         />
-      </div>
-    </div>
+      </Row>
+    </Container>
   );
 }

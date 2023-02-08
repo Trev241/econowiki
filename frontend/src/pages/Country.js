@@ -1,12 +1,17 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   ComposableMap,
   Geographies,
   Geography,
   ZoomableGroup,
 } from "react-simple-maps";
+
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+
 import CountryInfo from "../components/CountryInfo";
 
 const WORLD_GEO_URL =
@@ -98,51 +103,46 @@ export default function Country() {
 
   return (
     <>
-      <div className="p-4">
-        <Link
-          to={"/"}
-          className="px-3 py-2 border-0 text-dark text-decoration-none bg-light"
-        >
-          {"<"}
-        </Link>
-      </div>
-      <div
-        className="d-flex"
-        style={{
-          padding: "1rem 4rem",
-          visibility: centered ? "visible" : "hidden",
-        }}
-      >
-        <div
-          className="w-50 border"
-          style={{
-            height: "80vh",
-            cursor: "grab",
-          }}
-        >
-          <ComposableMap projection="geoMercator">
-            <ZoomableGroup center={center} zoom={zoom}>
-              <Geographies
-                geography={WORLD_GEO_URL}
-                onLoad={() => {
-                  console.log("loaded");
-                }}
-              >
-                {({ geographies, projection, path }) => {
-                  const geo = geographies.find((geo) => geo.id === params.id);
-                  geoRef.current = { geo, projection, path };
-                  return <Geography key={geo.rsmKey} geography={geo} />;
-                }}
-              </Geographies>
-            </ZoomableGroup>
-          </ComposableMap>
-        </div>
-        <div className="w-50 d-flex justify-content-center align-items-center">
-          <span className="display-4">
-            {countryLoading ? "" : country.name}
-          </span>
-        </div>
-      </div>
+
+      <Container>
+        {/* <div className="p-4">
+          <Link
+            to={"/"}
+            className="px-3 py-2 border-0 text-dark text-decoration-none bg-light"
+          >
+            {"<"}
+          </Link>
+        </div> */}
+
+        <Row className="my-3">
+          <Col>
+            <Container fluid>
+              <h1 className="display-1">{country.name}</h1>
+            </Container>
+          </Col>
+          <Col xs={4}>
+            <Container fluid>
+              <ComposableMap className="border border-dark rounded" projection="geoMercator">
+                <ZoomableGroup center={center} zoom={zoom}>
+                  <Geographies
+                    geography={WORLD_GEO_URL}
+                    onLoad={() => {
+                      console.log("loaded");
+                    }}
+                  >
+                    {({ geographies, projection, path }) => {
+                      const geo = geographies.find((geo) => geo.id === params.id);
+                      geoRef.current = { geo, projection, path };
+                      return <Geography key={geo.rsmKey} geography={geo} />;
+                    }}
+                  </Geographies>
+                </ZoomableGroup>
+              </ComposableMap>
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+
       {indicatorLoading || infoLoading ? (
         <div
           className="spinner-border"
