@@ -31,7 +31,7 @@ export default function CountryInfo({ info, indicators }) {
   const [otherCountries, setOtherCountries] = useState(new Set())
 
   const modData = useMemo(() => {
-    const result = [...Array(9)].map((_) => []);
+    const result = [...Array(9)].map(() => []);
     for (const value of info) {
       result[value.indicator_id - 1].push(value);
     }
@@ -69,7 +69,7 @@ export default function CountryInfo({ info, indicators }) {
 
   return (
     <Container>
-      {/* <Row className="my-3">
+      <Row className="my-3">
         <h5>Choose a list of countries to compare against</h5>
         <div>
           <Form.Select 
@@ -87,7 +87,7 @@ export default function CountryInfo({ info, indicators }) {
             )}
           </Form.Select>
         </div>  
-      </Row> */}
+      </Row>
 
       <Row className="my-5">
         <Chart
