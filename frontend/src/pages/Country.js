@@ -1,18 +1,20 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   ComposableMap,
   Geographies,
   Geography,
   ZoomableGroup,
 } from "react-simple-maps";
+import { useAuth0 } from "@auth0/auth0-react";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
 import CountryInfo from "../components/CountryInfo";
+import Spinner from "../components/Spinner";
 
 const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
@@ -32,13 +34,16 @@ export default function Country() {
   const geoRef = useRef(null);
 
   const params = useParams();
+  const { isAuthenticated } = useAuth0();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setCountryLoading(true);
     setIndicatorLoading(true);
     setInfoLoading(true);
-    
-    axios.get("http://localhost:5001/country/" + params.id)
+
+    axios
+      .get("http://localhost:5001/country/" + params.id)
       .then(({ data }) => {
         setCountry(data);
       })
@@ -48,7 +53,8 @@ export default function Country() {
       .finally(() => {
         setCountryLoading(false);
       });
-    axios.get("http://localhost:5001/indicator")
+    axios
+      .get("http://localhost:5001/indicator")
       .then(({ data }) => {
         setIndicators(data);
       })
@@ -59,7 +65,8 @@ export default function Country() {
         setIndicatorLoading(false);
       });
 
-    axios.get("http://localhost:5001/value/" + params.id)
+    axios
+      .get("http://localhost:5001/value/" + params.id)
       .then(({ data }) => {
         setInfo(data);
       })
@@ -70,6 +77,12 @@ export default function Country() {
         setInfoLoading(false);
       });
   }, [params.id]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (geoRef.current && !centered) {
@@ -110,57 +123,49 @@ export default function Country() {
             {"<"}
           </Link>
         </div> */}
-      
-        <Row className="mt-5 mb-5 text-center">
-          {!countryLoading ? (
-            <>
-              <Col className="d-flex align-items-center">
-                <Container fluid>
-                  <h1 className="display-1">{country.name}</h1>
-                  <p className="lead">({country.iso_alpha_2_code}, {country.iso_alpha_3_code}, {country.un_code})</p>
-                </Container>
-              </Col>
-              <Col className="d-flex align-items-center" xs={4}>
-                <Container fluid>
-                  <ComposableMap className="border border-dark rounded" projection="geoMercator">
-                    <ZoomableGroup center={center} zoom={zoom}>
-                      <Geographies
-                        geography={WORLD_GEO_URL}
-                        onLoad={() => {
-                          console.log("loaded");
-                        }}
-                      >
-                        {({ geographies, projection, path }) => {
-                          const geo = geographies.find((geo) => geo.id === params.id);
-                          geoRef.current = { geo, projection, path };
-                          return <Geography key={geo.rsmKey} geography={geo} />;
-                        }}
-                      </Geographies>
-                    </ZoomableGroup>
-                  </ComposableMap>
-                </Container>
-              </Col>
-            </>
-          ) : (
-            <></>
-          )}
+
+        <Row
+          className="mt-5 mb-5 text-center"
+          style={{
+            visibility: centered && !countryLoading ? "visible" : "hidden",
+          }}
+        >
+          <Col className="d-flex align-items-center">
+            <Container fluid>
+              <h1 className="display-1">{country.name}</h1>
+              <p className="lead">
+                ({country.iso_alpha_2_code}, {country.iso_alpha_3_code},{" "}
+                {country.un_code})
+              </p>
+            </Container>
+          </Col>
+          <Col className="d-flex align-items-center" xs={4}>
+            <Container fluid>
+              <ComposableMap
+                className="border border-dark rounded"
+                projection="geoMercator"
+              >
+                <ZoomableGroup center={center} zoom={zoom}>
+                  <Geographies geography={WORLD_GEO_URL}>
+                    {({ geographies, projection, path }) => {
+                      const geo = geographies.find(
+                        (geo) => geo.id === params.id
+                      );
+                      geoRef.current = { geo, projection, path };
+                      return <Geography key={geo.rsmKey} geography={geo} />;
+                    }}
+                  </Geographies>
+                </ZoomableGroup>
+              </ComposableMap>
+            </Container>
+          </Col>
         </Row>
       </Container>
 
       <hr className="my-5" />
 
       {indicatorLoading || infoLoading ? (
-        <div
-          className="spinner-border"
-          role="status"
-          style={{
-            position: "absolute",
-            bottom: "50%",
-            left: "50%",
-          }}
-        >
-          <span className="visually-hidden">Loading...</span>
-        </div>
+        <Spinner />
       ) : (
         <CountryInfo info={info} indicators={indicators} />
       )}

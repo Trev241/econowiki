@@ -17,6 +17,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import axios from "axios";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -25,10 +26,9 @@ import Form from "react-bootstrap/Form";
 import { mergeData } from "../utils";
 import Chart from "./Chart";
 
-
 export default function CountryInfo({ info, indicators }) {
-  const [countries, setCountries] = useState()
-  const [otherCountries, setOtherCountries] = useState(new Set())
+  const [countries, setCountries] = useState([]);
+  const [otherCountries, setOtherCountries] = useState(new Set());
 
   const modData = useMemo(() => {
     const result = [...Array(9)].map(() => []);
@@ -41,52 +41,48 @@ export default function CountryInfo({ info, indicators }) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch("http://localhost:5001/country")
-        setCountries(await response.json())
+        const response = await fetch("http://localhost:5001/country");
+        setCountries(await response.json());
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     }
 
-    fetchData()
-  }, [countries])
+    fetchData();
+  }, [countries]);
 
   const handleSelectChange = async (e) => {
     if (!otherCountries.delete(e.target.value)) {
-      const newSet = new Set(otherCountries)
-      newSet.add(e.target.value)
-      setOtherCountries(newSet)
+      const newSet = new Set(otherCountries);
+      newSet.add(e.target.value);
+      setOtherCountries(newSet);
 
       try {
-        const response = await fetch(`http://localhost:5001/country/${e.target.value}`)
+        const response = await axios.get(
+          `http://localhost:5001/country/${e.target.value}`
+        );
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     }
-
-    console.log(otherCountries)
-  }
+  };
 
   return (
     <Container>
       <Row className="my-3">
         <h5>Choose a list of countries to compare against</h5>
         <div>
-          <Form.Select 
-            className="me-2"
-            onChange={handleSelectChange}
-          >
+          <Form.Select className="me-2" onChange={handleSelectChange}>
             <option>(Select a country)</option>
-            {countries && countries.map((country, i) => 
-              <option
-                key={i}
-                value={country.iso_alpha_3_code}
-              >
-                {`${country.name}${otherCountries.has(country.iso_alpha_3_code) ? "*" : ""}`}
+            {countries.map((country, i) => (
+              <option key={i} value={country.iso_alpha_3_code}>
+                {`${country.name}${
+                  otherCountries.has(country.iso_alpha_3_code) ? "*" : ""
+                }`}
               </option>
-            )}
+            ))}
           </Form.Select>
-        </div>  
+        </div>
       </Row>
 
       <Row className="my-5">

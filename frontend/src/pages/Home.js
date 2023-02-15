@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAuth0 } from "@auth0/auth0-react";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -16,18 +18,19 @@ export default function Home() {
     id: "",
     name: "Select a country",
   });
-  const [countries, setCountries] = useState()
+  const [countries, setCountries] = useState([]);
 
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth0();
 
   useEffect(() => {
     async function fetchData() {
-      const response = await fetch("http://localhost:5001/country")
-      setCountries(await response.json())
+      const response = await axios.get("http://localhost:5001/country");
+      setCountries(response.data);
     }
 
-    fetchData()
-  }, [countries])
+    fetchData();
+  }, [countries]);
 
   return (
     <>
@@ -48,35 +51,32 @@ export default function Home() {
             <Container fluid>
               <Row>
                 <Col>
-                  <Form.Select 
+                  <Form.Select
                     className="mb-3"
-                    value={selectedGeo.id} 
+                    value={selectedGeo.id}
                     aria-label="Select a country"
                     onChange={(e) => navigate(`/${e.target.value}`)}
+                    disabled={!isAuthenticated}
                   >
                     <option>(Select a country)</option>
-                    {countries && countries.map((country, i) => 
-                      <option 
-                        key={i}
-                        value={country.iso_alpha_3_code}
-                      >
+                    {countries.map((country, i) => (
+                      <option key={i} value={country.iso_alpha_3_code}>
                         {country.name}
                       </option>
-                    )}
+                    ))}
                   </Form.Select>
                 </Col>
               </Row>
 
               <Row className="mb-3">
                 <Col>
-                  <h1 className="display-1">{selectedGeo.name}</h1>
+                  <h1 className="display-4">{selectedGeo.name}</h1>
                 </Col>
               </Row>
-
             </Container>
           </Col>
 
-          <Col>
+          <Col className="px-4 pb-4">
             <Container fluid>
               <ComposableMap className="border border-dark rounded">
                 <Geographies geography={WORLD_GEO_URL}>
@@ -101,7 +101,9 @@ export default function Home() {
                           },
                         }}
                         fill={SELECTED_GEO_FILL}
-                        onClick={() => navigate(`/${selectedGeo.id}`)}
+                        onClick={() =>
+                          isAuthenticated && navigate(`/${selectedGeo.id}`)
+                        }
                         onMouseEnter={() => {
                           setSelectedGeo({
                             id: geo.id,
