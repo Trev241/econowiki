@@ -26,7 +26,7 @@ import Form from "react-bootstrap/Form";
 import { mergeData } from "../utils";
 import Chart from "./Chart";
 
-export default function CountryInfo({ info, indicators }) {
+export default function CountryInfo({ country, info, indicators }) {
   const [countries, setCountries] = useState([]);
   const [otherCountries, setOtherCountries] = useState(new Set());
 
@@ -89,6 +89,7 @@ export default function CountryInfo({ info, indicators }) {
         <Chart
           name={indicators[8].name.toUpperCase()}
           description={indicators[8].description}
+          editRedirect={`/edit/?country=${country.iso_alpha_3_code}&indicator=${9}`}
           chart={
             <LineChart data={modData[8]}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -105,6 +106,7 @@ export default function CountryInfo({ info, indicators }) {
         <Chart
           name={indicators[1].name.toUpperCase()}
           description={indicators[1].description}
+          editRedirect={`/edit/?country=${country.iso_alpha_3_code}&indicator=${2}`}
           chart={
             <AreaChart data={modData[1]}>
               <XAxis dataKey="year" />
@@ -124,6 +126,7 @@ export default function CountryInfo({ info, indicators }) {
         <Chart
           name={indicators[3].name.toUpperCase()}
           description={indicators[3].description}
+          editRedirect={`/edit/?country=${country.iso_alpha_3_code}&indicator=${4}`}
           chart={
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" />
@@ -139,6 +142,7 @@ export default function CountryInfo({ info, indicators }) {
         <Chart
           name={indicators[6].name.toUpperCase()}
           description={indicators[6].description}
+          editRedirect={`/edit/?country=${country.iso_alpha_3_code}&indicator=${7}`}
           chart={
             <FunnelChart>
               <Tooltip />
@@ -158,6 +162,7 @@ export default function CountryInfo({ info, indicators }) {
         <Chart
           name={indicators[0].name.toUpperCase()}
           description={indicators[0].description}
+          editRedirect={`/edit/?country=${country.iso_alpha_3_code}&indicator=${1}`}
           chart={
             <BarChart data={modData[0]}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -173,6 +178,7 @@ export default function CountryInfo({ info, indicators }) {
         <Chart
           name={indicators[2].name.toUpperCase()}
           description={indicators[2].description}
+          editRedirect={`/edit/?country=${country.iso_alpha_3_code}&indicator=${3}`}
           chart={
             <BarChart data={modData[2]}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -188,6 +194,7 @@ export default function CountryInfo({ info, indicators }) {
         <Chart
           name={indicators[7].name.toUpperCase()}
           description={indicators[7].description}
+          editRedirect={`/edit/?country=${country.iso_alpha_3_code}&indicator=${8}`}
           chart={
             <BarChart data={modData[7]}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -203,6 +210,7 @@ export default function CountryInfo({ info, indicators }) {
         <Chart
           name={`${indicators[4].short_name.toUpperCase()} & ${indicators[5].short_name.toUpperCase()}`}
           description={indicators[4].description}
+          editRedirect={`/edit/?country=${country.iso_alpha_3_code}&indicator=${5}`}
           chart={
             <LineChart data={mergeData(modData[5], modData[4])}>
               <CartesianGrid strokeDasharray="3 3" />

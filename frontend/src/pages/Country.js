@@ -162,12 +162,12 @@ export default function Country() {
         </Row>
       </Container>
 
-      <hr className="my-5" />
+      {/* <hr className="my-5" /> */}
 
       {indicatorLoading || infoLoading ? (
         <Spinner />
       ) : (
-        <CountryInfo info={info} indicators={indicators} />
+        <CountryInfo country={country} info={info} indicators={indicators} />
       )}
     </>
   );
