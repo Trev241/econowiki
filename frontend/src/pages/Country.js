@@ -1,13 +1,12 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   ComposableMap,
   Geographies,
   Geography,
   ZoomableGroup,
 } from "react-simple-maps";
-import { useAuth0 } from "@auth0/auth0-react";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -15,6 +14,7 @@ import Col from "react-bootstrap/Col";
 
 import CountryInfo from "../components/CountryInfo";
 import Spinner from "../components/Spinner";
+import { useIsAuth } from "../hooks/useIsAuth";
 
 const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
@@ -32,10 +32,7 @@ export default function Country() {
   const [infoLoading, setInfoLoading] = useState(true);
 
   const geoRef = useRef(null);
-
   const params = useParams();
-  const { isAuthenticated } = useAuth0();
-  const navigate = useNavigate();
 
   useEffect(() => {
     setCountryLoading(true);
@@ -79,12 +76,6 @@ export default function Country() {
   }, [params.id]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/");
-    }
-  }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
     if (geoRef.current && !centered) {
       // const ratio = window.innerWidth / window.innerHeight
       // const width = Math.min(window.innerHeight * ratio, window.innerWidth)
@@ -111,6 +102,8 @@ export default function Country() {
       setCentered(true);
     }
   });
+
+  useIsAuth();
 
   return (
     <>
