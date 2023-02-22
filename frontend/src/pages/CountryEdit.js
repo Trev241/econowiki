@@ -26,10 +26,10 @@ export default function CountryEdit() {
   const [country, setCountry] = useState()
 
   const [showUnsaved, setShowUnsaved] = useState(false);
-  const [alert, setAlert] = useState({
-    message: "",
-    status: "",
-  });
+  // const [alert, setAlert] = useState({
+  //   message: "",
+  //   status: "",
+  // });
 
   useEffect(() => {
     async function fetchData() {
@@ -225,10 +225,11 @@ export default function CountryEdit() {
       })
     } catch (error) {
       console.error(error);
-      setAlert({
-        message: "Some error has occured, please try again later!",
-        status: "danger",
-      });
+      // setAlert({
+      //   message: "Some error has occured, please try again later!",
+      //   status: "danger",
+      // });
+      alert(`An error occurred. ${error}`)
     }
   };
 
@@ -360,6 +361,6 @@ export default function CountryEdit() {
           )}
         </Container>
       </Container>
-    </Container>
+    </>
   );
 }
