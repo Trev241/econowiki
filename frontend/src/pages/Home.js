@@ -30,7 +30,7 @@ export default function Home() {
     }
 
     fetchData();
-  }, [countries]);
+  }, []);
 
   return (
     <>
@@ -58,7 +58,7 @@ export default function Home() {
                     onChange={(e) => navigate(`/${e.target.value}`)}
                     disabled={!isAuthenticated}
                   >
-                    <option>(Select a country)</option>
+                    <option>{">"} &nbsp;Select a country</option>
                     {countries.map((country, i) => (
                       <option key={i} value={country.iso_alpha_3_code}>
                         {country.name}

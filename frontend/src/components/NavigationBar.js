@@ -6,15 +6,22 @@ import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 // import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import { GiWorld } from "react-icons/gi";
 
 export default function NavigationBar() {
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
   return (
-    <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+    <Navbar
+      collapseOnSelect
+      expand="lg"
+      bg="dark"
+      variant="dark"
+      className="p-4"
+    >
       <Container>
         <Navbar.Brand>
           <Link to={"/"} className="text-decoration-none text-white">
-            World Income
+            <GiWorld size={"50px"} /> &nbsp;World Income
           </Link>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />

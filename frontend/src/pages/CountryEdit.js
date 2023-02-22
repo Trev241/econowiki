@@ -1,41 +1,53 @@
+import axios from "axios";
+import HTMLParser from "html-react-parser";
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
 import Alert from "react-bootstrap/Alert";
+import Badge from "react-bootstrap/Badge";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+import { AiFillDelete, AiFillSave } from "react-icons/ai";
+import { BsFilter } from "react-icons/bs";
+import { MdCancel, MdError } from "react-icons/md";
+import { useSearchParams } from "react-router-dom";
+import Spinner from "../components/Spinner";
+import { useIsAuth } from "../hooks/useIsAuth";
 
 export default function CountryEdit() {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // From API
-  const [values, setValues] = useState([])
+  const [values, setValues] = useState([]);
   const [oldValues, setOldValues] = useState([])
-  const [countries, setCountries] = useState()
-  const [indicators, setIndicators] = useState()
+  const [countries, setCountries] = useState();
+  const [indicators, setIndicators] = useState();
   const [country, setCountry] = useState()
 
-  const [showUnsaved, setShowUnsaved] = useState(false)
+  const [showUnsaved, setShowUnsaved] = useState(false);
+  const [alert, setAlert] = useState({
+    message: "",
+    status: "",
+  });
 
   useEffect(() => {
     async function fetchData() {
       try {
-        let response
-        
-        response = await fetch(`http://localhost:5001/indicator`) 
-        setIndicators(await response.json())
-        
-        response = await fetch(`http://localhost:5001/country`)
-        setCountries(await response.json())
+        let response;
+
+        response = await axios.get(`http://localhost:5001/indicator`);
+        setIndicators(response.data);
+
+        response = await axios.get(`http://localhost:5001/country`);
+        setCountries(response.data);
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     }
 
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -62,7 +74,7 @@ export default function CountryEdit() {
         setOldValues(rows.map(row => { return { ...row } }))
         setShowUnsaved(false)
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     }
 
@@ -70,14 +82,14 @@ export default function CountryEdit() {
   }, [searchParams, countries, indicators])
 
   const updateCountryFilter = (e) => {
-    searchParams.set("country", e.target.value)
-    setSearchParams(searchParams)
-  }
+    searchParams.set("country", e.target.value);
+    setSearchParams(searchParams);
+  };
 
   const updateIndicatorFilter = (e) => {
-    searchParams.set("indicator", e.target.value)
-    setSearchParams(searchParams)
-  } 
+    searchParams.set("indicator", e.target.value);
+    setSearchParams(searchParams);
+  };
 
   const getBorderStyle = (entry) => {
     let style = "border border-4 rounded p-3 "
@@ -172,9 +184,9 @@ export default function CountryEdit() {
     })
 
     if (invalid) {
-      alert("Failed to save changes. Unexpected value(s) encountered.")
-      return
-    } 
+      alert("Failed to save changes. Unexpected value(s) encountered.");
+      return;
+    }
 
     try {
       values.forEach(async (entry) => {
@@ -212,8 +224,16 @@ export default function CountryEdit() {
         })
       })
     } catch (error) {
-      console.error(error)
+      console.error(error);
+      setAlert({
+        message: "Some error has occured, please try again later!",
+        status: "danger",
+      });
     }
+  };
+
+  if (!values || !countries || !indicators) {
+    return <Spinner />;
   }
 
   return (
@@ -326,8 +346,8 @@ export default function CountryEdit() {
                 />
               </Col>
               <Col className="mb-2">
-                <Form.Control 
-                  className="text-end"
+                <Form.Control
+                  className="text-center"
                   type="text"
                   name="value"
                   value={entry.value}
@@ -340,6 +360,6 @@ export default function CountryEdit() {
           )}
         </Container>
       </Container>
-    </>
-  )
+    </Container>
+  );
 }
