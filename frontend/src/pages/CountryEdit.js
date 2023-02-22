@@ -7,16 +7,17 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Alert from "react-bootstrap/Alert";
 
-// import Offcanvas from 'react-bootstrap/Offcanvas';
-
 export default function CountryEdit() {
   const [searchParams, setSearchParams] = useSearchParams()
 
-  // API
+  // From API
   const [values, setValues] = useState([])
+  const [oldValues, setOldValues] = useState([])
   const [countries, setCountries] = useState()
   const [indicators, setIndicators] = useState()
-  const [changes, setChanges] = useState({})
+  const [country, setCountry] = useState()
+
+  const [showUnsaved, setShowUnsaved] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -39,8 +40,14 @@ export default function CountryEdit() {
   useEffect(() => {
     async function fetchData() {
       try {
+        let response
+
+        // Fetch country
+        response = await fetch(`http://localhost:5001/country/${searchParams.get("country")}`)
+        setCountry(await response.json())
+
         // Fetch values of country
-        const response = await fetch(`http://localhost:5001/value/${searchParams.get("country")}`)
+        response = await fetch(`http://localhost:5001/value/${searchParams.get("country")}`)
         const results = await response.json()
 
         // Filter indicator
@@ -48,16 +55,19 @@ export default function CountryEdit() {
         results.forEach((entry) => {
           if (entry.indicator_id === +searchParams.get("indicator"))
             rows.push(entry)
-        })        
-
+        })
+        
+        // Create copy in case reset is necessary
         setValues(rows)
+        setOldValues(rows.map(row => { return { ...row } }))
+        setShowUnsaved(false)
       } catch (error) {
         console.error(error)
       }
     }
 
     fetchData()
-  }, [searchParams])
+  }, [searchParams, countries, indicators])
 
   const updateCountryFilter = (e) => {
     searchParams.set("country", e.target.value)
@@ -69,41 +79,96 @@ export default function CountryEdit() {
     setSearchParams(searchParams)
   } 
 
-  const updateValues = (e, idx) => {
-    // Setting UI state
-    const newValues = [...values]
-    newValues[idx].value = e.target.value
-    
-    // Caching changes to be made as id-entry pair
-    const change = { 
-      [newValues[idx].id]: {
-        country_id: newValues[idx].country_id,
-        indicator_id: newValues[idx].indicator_id,
-        year: newValues[idx].year,
-        value: newValues[idx].value
-      }
+  const getBorderStyle = (entry) => {
+    let style = "border border-4 rounded p-3 "
+
+    if (entry.addition)
+      style += "border-success"
+    else if (entry.delete)
+      style += "border-danger"
+    else if (entry.edited)
+      style += "border-warning"
+    else
+      style = ""
+
+    return style
+  }
+
+  const edit = (e, idx) => {
+    let newValues = [...values]
+    newValues[idx][e.target.name] = e.target.value
+    newValues[idx].edited = !newValues[idx].addition && true
+
+    setValues(newValues)
+    setShowUnsaved(true)
+  }
+
+  const add = () => {
+    setValues(prev => (
+      [...prev, {
+        id: prev.length + 1,
+        country_id: country.id,
+        indicator_id: searchParams.get("indicator"),
+        year: "",
+        value: "",
+        addition: true
+      }]
+    ))
+    setShowUnsaved(true)
+  }
+
+  const remove = async () => {
+    try {
+      values.forEach(async (entry) => {
+        if (!entry.selected)
+          return
+          
+        await fetch(`http://localhost:5001/value/${entry.id}`, {
+          method: "DELETE"
+        })
+        .then(response => {
+          if (!response.ok) throw new Error(response.status)
+          else return response.json()
+        })
+        .then(response => {
+          alert("Deleted entries successfully")
+          window.location.reload()
+        })
+        .catch(error => {
+          alert(`An error occurred. ${error}`)
+        })
+      })
+    } catch (error) {
+      console.error(error)
     }
-    setChanges((prev) => {
-      return {...prev, ...change}
-    })
+  }
+
+  const select = (e, idx) => {
+    let newValues = [...values]
+    newValues[idx].selected = e.target.checked
+
     setValues(newValues)
   }
 
   const discard = () => {
-    setChanges({})
+    setValues(oldValues.map(oldValue => { return {...oldValue} }))
+    setShowUnsaved(false)
   }
 
   const isNumeric = (str) => {
-    if (typeof str != "string") return false // we only process strings!  
-    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-      !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+    if (typeof str === "number") 
+      return true
+
+    if (typeof str === "string")
+      return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
   }
 
   const save = async () => {
-    // Validate
+    // Validate values before making call to API
     let invalid = false
-    Object.keys(changes).forEach((id) => {
-      invalid = !isNumeric(changes[id].value) || invalid
+    values.forEach((entry) => {
+      invalid = !isNumeric(entry.value) || !isNumeric(entry.year) || invalid
     })
 
     if (invalid) {
@@ -112,15 +177,26 @@ export default function CountryEdit() {
     } 
 
     try {
-      Object.keys(changes).forEach(async (id) => {
-        await fetch(`http://localhost:5001/value/update/${id}`, {
-          method: "PUT",
-          headers: {"Content-Type": "application/json"},
+      values.forEach(async (entry) => {
+        let api_endpoint, method
+        
+        if (entry.edited) {
+          api_endpoint = `http://localhost:5001/value/update/${entry.id}`
+          method = "PUT"
+        } else if (entry.addition) {
+          api_endpoint = "http://localhost:5001/value/add"
+          method = "POST"
+        } else return
+
+          // PUT edits
+        await fetch(api_endpoint, {
+          method: method,
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            country_id: changes[id].country_id,
-            indicator_id: changes[id].indicator_id,
-            year: changes[id].year,
-            value: changes[id].value
+            country_id: entry.country_id,
+            indicator_id: entry.indicator_id,
+            year: entry.year,
+            value: entry.value
           })
         })
         .then((response) => {
@@ -129,6 +205,7 @@ export default function CountryEdit() {
         })
         .then((response) => {
           alert("Changes successfully saved!")
+          window.location.reload()
         })
         .catch((error) => {
           alert(`An error occurred. ${error}`)
@@ -140,10 +217,10 @@ export default function CountryEdit() {
   }
 
   return (
-    values && countries && indicators && <>
+    values && oldValues && countries && indicators && country && <>
       <Container className="mb-3">
-        <Form className="border rounded p-4 my-5">
-          <h1 className="mb-3">Choose a filter</h1>
+        <div className="border rounded p-4 my-5">
+          <h1 className="mb-3">Choose a country and a category</h1>
           <Form.Group as={Row} className="mb-3" controlId="country">
             <Form.Label column sm={2}>Country</Form.Label>
             <Col>
@@ -168,12 +245,12 @@ export default function CountryEdit() {
               </Form.Select>
             </Col>
           </Form.Group>
-        </Form>
+        </div>
 
-        {Object.keys(changes).length > 0 && 
-          <Alert key="warning" variant="warning">
+        {showUnsaved && 
+          <Alert className="my-5" key="warning" variant="warning">
             <div className="d-flex align-items-center">
-              <span>You have unsaved changes!</span>
+              <span>You have <b>unsaved changes</b>! Remember to save your changes before leaving this page.</span>
               <Button className="ms-auto" variant="success" onClick={save}>Save</Button>
             </div>
           </Alert>
@@ -181,49 +258,86 @@ export default function CountryEdit() {
 
         <Container className="mb-3">
           <h1 className="mb-3">Values</h1>
-          {/* <hr className="mb-3" /> */}
-          <p className="lead mb-5">Remove entries using the delete button or edit existing values using the input fields below.</p>
+          
+          <Row className="mb-5">
+            <Col md={3}>
+              <Button
+                className="w-100 mb-2"
+                onClick={add}
+              >
+                Create entry
+              </Button>
+            </Col>
+
+            <Col md={4}>
+              <Button
+                className="w-100 mb-2"
+                variant="danger"
+                onClick={remove}
+              >
+                Delete selected entries
+              </Button>
+            </Col>
+
+            <Col md={3}>
+              <Button 
+                className="w-100 mb-2" 
+                variant="success" 
+                onClick={save}
+                disabled={!showUnsaved}
+              >
+                Save Changes
+              </Button>
+            </Col>
+
+            <Col>
+              <Button 
+                className="w-100" 
+                variant="secondary"
+                onClick={discard}
+                disabled={!showUnsaved}
+              >
+                Discard
+              </Button>
+            </Col>
+          </Row>
+
+          {/* <hr className="mb-5" /> */}
+          
           {values.length > 0 ? ( values.map((entry, idx) => (
-            <Row className="mb-3">
-              <Col sm={2} className="mb-2">{entry.year}</Col>
+            <Row className={`mb-3 ${getBorderStyle(entry)}`}>
+              <Col xs={1}>
+                <div className="d-flex align-items-center" style={{ minHeight: "75%" }}>
+                  <Form.Check 
+                    type="checkbox"
+                    onChange={(e) => select(e, idx)}
+                  />
+                </div>
+              </Col>
+              <Col xs={3} className="mb-2">
+                <Form.Control
+                  type="number"
+                  min="1000"
+                  max="3000"
+                  step="1"
+                  name="year"
+                  value={entry.year}
+                  onChange={(e) => edit(e, idx)}
+                />
+              </Col>
               <Col className="mb-2">
                 <Form.Control 
                   className="text-end"
                   type="text"
+                  name="value"
                   value={entry.value}
-                  onChange={(e) => updateValues(e, idx)}
+                  onChange={(e) => edit(e, idx)}
                 />
-              </Col>
-              <Col sm={2}>
-                <div className="d-flex">
-                  <Button className="ms-auto" variant="danger">
-                    Delete
-                  </Button>
-                </div>
               </Col>
             </Row>
           ))) : (
             <>No available data</>
           )}
-
-          <div className="d-flex mt-5">
-            <Button 
-              className="ms-auto" 
-              variant="success" 
-              onClick={save} 
-              disabled={Object.keys(changes).length === 0}
-            >
-              Save Changes
-            </Button>
-            <Button 
-              className="ms-2" 
-              variant="secondary"
-              onClick={discard}
-              disabled={Object.keys(changes).length === 0}
-            >
-              Discard
-            </Button>
-          </div>
         </Container>
       </Container>
     </>

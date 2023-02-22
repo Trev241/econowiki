@@ -46,7 +46,7 @@ def get_values(iso_alpha_3_code: str):
 
     return jsonify(result)
 
-@app.route('/value/add/', methods=['POST'])
+@app.route('/value/add', methods=['POST'])
 def add_value():
     country_id = request.json['country_id']
     indicator_id = request.json['indicator_id']
@@ -74,6 +74,14 @@ def update_value(id: int):
     entry.year = year
     entry.value = value
 
+    db.session.commit()
+
+    return country_val_schema.jsonify(entry)
+
+@app.route('/value/<id>', methods=['DELETE'])
+def delete_value(id: int):
+    entry = CountryIndicatorValue.query.get(id)
+    db.session.delete(entry)
     db.session.commit()
 
     return country_val_schema.jsonify(entry)
