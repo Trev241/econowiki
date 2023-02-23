@@ -63,12 +63,13 @@ export default function CountryEdit() {
         const results = await response.json()
 
         // Filter indicator
-        let rows = []
-        results.forEach((entry) => {
-          if (entry.indicator_id === +searchParams.get("indicator"))
-            rows.push(entry)
-        })
-        
+        // let rows = []
+        // results.forEach((entry) => {
+        //   if (entry.indicator_id === +searchParams.get("indicator"))
+        //     rows.push(entry)
+        // })
+        const rows = results.filter(entry => entry.indicator_id === +searchParams.get("indicator"))
+
         // Create copy in case reset is necessary
         setValues(rows)
         setOldValues(rows.map(row => { return { ...row } }))
@@ -130,26 +131,37 @@ export default function CountryEdit() {
   }
 
   const remove = async () => {
+    let newValues = []
+    
     try {
       values.forEach(async (entry) => {
-        if (!entry.selected)
-          return
-          
-        await fetch(`http://localhost:5001/value/${entry.id}`, {
-          method: "DELETE"
-        })
-        .then(response => {
-          if (!response.ok) throw new Error(response.status)
-          else return response.json()
-        })
-        .then(response => {
-          alert("Deleted entries successfully")
-          window.location.reload()
-        })
-        .catch(error => {
-          alert(`An error occurred. ${error}`)
-        })
+        if (entry.selected) {
+          // No need to call API if entry was not saved to database
+          if (entry.addition) 
+            return
+
+          await fetch(`http://localhost:5001/value/${entry.id}`, {
+            method: "DELETE"
+          })
+          .then(response => {
+            if (!response.ok) throw new Error(response.status)
+            else return response.json()
+          })
+          .then(response => {
+            // alert("Deleted entries successfully")
+            // window.location.reload()
+          })
+          .catch(error => {
+            // alert(`An error occurred. ${error}`)
+          })
+        } else {
+          // Update values for display
+          newValues.push(entry)
+        }
       })
+
+      alert("Deleted entries successfully")
+      setValues(newValues)
     } catch (error) {
       console.error(error)
     }
@@ -158,7 +170,6 @@ export default function CountryEdit() {
   const select = (e, idx) => {
     let newValues = [...values]
     newValues[idx].selected = e.target.checked
-
     setValues(newValues)
   }
 
@@ -188,6 +199,7 @@ export default function CountryEdit() {
       return;
     }
 
+    let newValues = []
     try {
       values.forEach(async (entry) => {
         let api_endpoint, method
@@ -215,14 +227,10 @@ export default function CountryEdit() {
           if (!response.ok) throw new Error(response.status)
           else return response.json()
         })
-        .then((response) => {
-          alert("Changes successfully saved!")
-          window.location.reload()
-        })
-        .catch((error) => {
-          alert(`An error occurred. ${error}`)
-        })
       })
+
+      alert("Successfully saved changes!")
+      window.location.reload()
     } catch (error) {
       console.error(error);
       // setAlert({
@@ -290,13 +298,13 @@ export default function CountryEdit() {
               </Button>
             </Col>
 
-            <Col md={4}>
+            <Col md={3}>
               <Button
                 className="w-100 mb-2"
                 variant="danger"
                 onClick={remove}
               >
-                Delete selected entries
+                Delete selected
               </Button>
             </Col>
 
@@ -331,6 +339,7 @@ export default function CountryEdit() {
                 <div className="d-flex align-items-center" style={{ minHeight: "75%" }}>
                   <Form.Check 
                     type="checkbox"
+                    checked={entry.selected}
                     onChange={(e) => select(e, idx)}
                   />
                 </div>
