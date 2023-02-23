@@ -1,8 +1,7 @@
 import axios from "axios";
 import HTMLParser from "html-react-parser";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Alert from "react-bootstrap/Alert";
-import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
@@ -10,7 +9,9 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { AiFillDelete, AiFillSave } from "react-icons/ai";
 import { BsFilter } from "react-icons/bs";
-import { MdCancel, MdError } from "react-icons/md";
+import { MdCancel, MdError, MdOutlineFeaturedPlayList } from "react-icons/md";
+import { FaCheck } from "react-icons/fa";
+import { IoIosAddCircleOutline } from "react-icons/io";
 import { useSearchParams } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import { useIsAuth } from "../hooks/useIsAuth";
@@ -18,18 +19,25 @@ import { useIsAuth } from "../hooks/useIsAuth";
 export default function CountryEdit() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // From API
   const [values, setValues] = useState([]);
-  const [oldValues, setOldValues] = useState([])
+  const [oldValues, setOldValues] = useState([]);
   const [countries, setCountries] = useState();
   const [indicators, setIndicators] = useState();
-  const [country, setCountry] = useState()
+  const [country, setCountry] = useState();
 
   const [showUnsaved, setShowUnsaved] = useState(false);
-  // const [alert, setAlert] = useState({
-  //   message: "",
-  //   status: "",
-  // });
+  const [alert, setAlert] = useState({
+    message: "",
+    status: "",
+  });
+
+  const showError = useCallback((error) => {
+    setAlert({
+      status: "danger",
+      message: "Some error has occured, please try again in sometime!",
+    });
+    console.error(error);
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -42,177 +50,187 @@ export default function CountryEdit() {
         response = await axios.get(`http://localhost:5001/country`);
         setCountries(response.data);
       } catch (error) {
-        console.error(error);
+        showError(error);
       }
     }
 
     fetchData();
-  }, []);
+  }, [showError]);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        let response
+        let response;
 
         // Fetch country
-        response = await fetch(`http://localhost:5001/country/${searchParams.get("country")}`)
-        setCountry(await response.json())
+        response = await axios.get(
+          `http://localhost:5001/country/${searchParams.get("country")}`
+        );
+        setCountry(response.data);
 
         // Fetch values of country
-        response = await fetch(`http://localhost:5001/value/${searchParams.get("country")}`)
-        const results = await response.json()
-
-        // Filter indicator
-        // let rows = []
-        // results.forEach((entry) => {
-        //   if (entry.indicator_id === +searchParams.get("indicator"))
-        //     rows.push(entry)
-        // })
-        const rows = results.filter(entry => entry.indicator_id === +searchParams.get("indicator"))
+        response = await axios.get(
+          `http://localhost:5001/value/${searchParams.get("country")}`
+        );
+        const results = response.data;
+        const filtered = results.filter(
+          (entry) => entry.indicator_id === +searchParams.get("indicator")
+        );
 
         // Create copy in case reset is necessary
-        setValues(rows)
-        setOldValues(rows.map(row => { return { ...row } }))
-        setShowUnsaved(false)
+        setValues(filtered);
+        setOldValues([...results]);
+        setShowUnsaved(false);
       } catch (error) {
-        console.error(error);
+        showError(error);
       }
     }
 
-    fetchData()
-  }, [searchParams, countries, indicators])
+    fetchData();
+  }, [searchParams, countries, indicators, showError]);
 
-  const updateCountryFilter = (e) => {
-    searchParams.set("country", e.target.value);
-    setSearchParams(searchParams);
-  };
+  useIsAuth();
 
-  const updateIndicatorFilter = (e) => {
-    searchParams.set("indicator", e.target.value);
-    setSearchParams(searchParams);
-  };
+  const updateCountryFilter = useCallback(
+    (e) => {
+      searchParams.set("country", e.target.value);
+      setSearchParams(searchParams);
+    },
+    [searchParams, setSearchParams]
+  );
 
-  const getBorderStyle = (entry) => {
-    let style = "border border-4 rounded p-3 "
+  const updateIndicatorFilter = useCallback(
+    (e) => {
+      searchParams.set("indicator", e.target.value);
+      setSearchParams(searchParams);
+    },
+    [searchParams, setSearchParams]
+  );
 
-    if (entry.addition)
-      style += "border-success"
-    else if (entry.delete)
-      style += "border-danger"
-    else if (entry.edited)
-      style += "border-warning"
-    else
-      style = ""
+  const getBorderStyle = useCallback((entry) => {
+    let style = "border border-2 rounded p-3 ";
 
-    return style
-  }
+    if (entry.addition) style += "border-success";
+    else if (entry.delete) style += "border-danger";
+    else if (entry.edited) style += "border-warning";
+    else style = "";
 
-  const edit = (e, idx) => {
-    let newValues = [...values]
-    newValues[idx][e.target.name] = e.target.value
-    newValues[idx].edited = !newValues[idx].addition && true
+    return style;
+  }, []);
 
-    setValues(newValues)
-    setShowUnsaved(true)
-  }
+  const edit = useCallback(
+    (e, idx) => {
+      let newValues = [...values];
+      newValues[idx][e.target.name] = e.target.value;
+      newValues[idx].edited = !newValues[idx].addition;
 
-  const add = () => {
-    setValues(prev => (
-      [...prev, {
+      setValues(newValues);
+      setShowUnsaved(true);
+    },
+    [values]
+  );
+
+  const add = useCallback(() => {
+    setValues((prev) => [
+      {
         id: prev.length + 1,
         country_id: country.id,
         indicator_id: searchParams.get("indicator"),
         year: "",
         value: "",
-        addition: true
-      }]
-    ))
-    setShowUnsaved(true)
-  }
+        addition: true,
+      },
+      ...prev,
+    ]);
+    setShowUnsaved(true);
+  }, [country, searchParams]);
 
   const remove = async () => {
-    let newValues = []
-    
+    let newValues = [];
+    let years = [];
+
     try {
-      values.forEach(async (entry) => {
+      for (const entry of values) {
         if (entry.selected) {
-          // No need to call API if entry was not saved to database
-          if (entry.addition) 
-            return
-
-          await fetch(`http://localhost:5001/value/${entry.id}`, {
-            method: "DELETE"
-          })
-          .then(response => {
-            if (!response.ok) throw new Error(response.status)
-            else return response.json()
-          })
-          .then(response => {
-            // alert("Deleted entries successfully")
-            // window.location.reload()
-          })
-          .catch(error => {
-            // alert(`An error occurred. ${error}`)
-          })
-        } else {
-          // Update values for display
-          newValues.push(entry)
+          if (!entry.addition) {
+            await axios
+              .delete(`http://localhost:5001/value/${entry.id}`)
+              .then(() => years.push(entry.year))
+              .catch(() => {
+                setAlert({
+                  status: "danger",
+                  message:
+                    "Some error has occured, please try again in sometime!",
+                });
+              });
+          } else {
+            newValues.push(entry);
+          }
         }
-      })
-
-      alert("Deleted entries successfully")
-      setValues(newValues)
+      }
+      setAlert({
+        status: "success",
+        message: `<span>All selected entries has been deleted successfully! <b>(${years.join(
+          ","
+        )})</b></span>`,
+      });
+      setValues(newValues);
     } catch (error) {
-      console.error(error)
+      showError(error);
     }
-  }
+  };
 
-  const select = (e, idx) => {
-    let newValues = [...values]
-    newValues[idx].selected = e.target.checked
-    setValues(newValues)
-  }
+  const select = useCallback(
+    (e, idx) => {
+      let newValues = [...values];
+      newValues[idx].selected = e.target.checked;
+      setValues(newValues);
+    },
+    [values]
+  );
 
-  const discard = () => {
-    setValues(oldValues.map(oldValue => { return {...oldValue} }))
-    setShowUnsaved(false)
-  }
+  const discard = useCallback(() => {
+    setValues([...oldValues]);
+    setShowUnsaved(false);
+  }, [oldValues]);
 
-  const isNumeric = (str) => {
-    if (typeof str === "number") 
-      return true
+  const isNumeric = useCallback((str) => {
+    if (typeof str === "number") return true;
 
     if (typeof str === "string")
-      return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
-  }
+      return (
+        !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+        !isNaN(parseFloat(str))
+      ); // ...and ensure strings of whitespace fail
+  }, []);
 
-  const save = async () => {
+  const save = useCallback(async () => {
     // Validate values before making call to API
-    let invalid = false
+    let invalid = false;
     values.forEach((entry) => {
-      invalid = !isNumeric(entry.value) || !isNumeric(entry.year) || invalid
-    })
+      invalid = !isNumeric(entry.value) || !isNumeric(entry.year) || invalid;
+    });
 
     if (invalid) {
-      alert("Failed to save changes. Unexpected value(s) encountered.");
+      setAlert({
+        status: "danger",
+        message: "Failed to save changes. Unexpected value(s) encountered.",
+      });
       return;
     }
 
-    let newValues = []
     try {
-      values.forEach(async (entry) => {
-        let api_endpoint, method
-        
-        if (entry.edited) {
-          api_endpoint = `http://localhost:5001/value/update/${entry.id}`
-          method = "PUT"
-        } else if (entry.addition) {
-          api_endpoint = "http://localhost:5001/value/add"
-          method = "POST"
-        } else return
+      for (const entry of values) {
+        let api_endpoint, method;
 
-          // PUT edits
+        if (entry.edited) {
+          api_endpoint = `http://localhost:5001/value/update/${entry.id}`;
+          method = "PUT";
+        } else if (entry.addition) {
+          api_endpoint = "http://localhost:5001/value/add";
+          method = "POST";
+        } else return;
+
         await fetch(api_endpoint, {
           method: method,
           headers: { "Content-Type": "application/json" },
@@ -220,152 +238,174 @@ export default function CountryEdit() {
             country_id: entry.country_id,
             indicator_id: entry.indicator_id,
             year: entry.year,
-            value: entry.value
-          })
-        })
-        .then((response) => {
-          if (!response.ok) throw new Error(response.status)
-          else return response.json()
-        })
-      })
+            value: entry.value,
+          }),
+        });
+      }
 
-      alert("Successfully saved changes!")
-      window.location.reload()
+      setAlert({
+        status: "success",
+        message: "Saved changes successfully!",
+      });
+      window.location.reload();
     } catch (error) {
-      console.error(error);
-      // setAlert({
-      //   message: "Some error has occured, please try again later!",
-      //   status: "danger",
-      // });
-      alert(`An error occurred. ${error}`)
+      showError(error);
     }
-  };
+  }, [isNumeric, showError, values]);
 
-  if (!values || !countries || !indicators) {
+  if (!values || !countries || !indicators || !country || !oldValues) {
     return <Spinner />;
   }
 
   return (
-    values && oldValues && countries && indicators && country && <>
+    <>
+      {alert.message && (
+        <Container>
+          <Alert dismissible variant={alert.status}>
+            {alert.status === "success" ? <FaCheck /> : <MdError />}{" "}
+            {HTMLParser(alert.message)}
+          </Alert>
+        </Container>
+      )}
       <Container className="mb-3">
         <div className="border rounded p-4 my-5">
-          <h1 className="mb-3">Choose a country and a category</h1>
+          <h4 className="mb-3">
+            <BsFilter /> Filter
+          </h4>
           <Form.Group as={Row} className="mb-3" controlId="country">
-            <Form.Label column sm={2}>Country</Form.Label>
+            <Form.Label column sm={2}>
+              Country
+            </Form.Label>
             <Col>
               <Form.Select
                 value={searchParams.get("country")}
                 onChange={updateCountryFilter}
               >
                 <option>-Select a country-</option>
-                {countries.map((country) => <option value={country.iso_alpha_3_code}>{country.name}</option>)}
+                {countries.map((country) => (
+                  <option value={country.iso_alpha_3_code}>
+                    {country.name}
+                  </option>
+                ))}
               </Form.Select>
             </Col>
           </Form.Group>
           <Form.Group as={Row} className="mb-3">
-            <Form.Label column sm={2}>Economic Indicator</Form.Label>
+            <Form.Label column sm={2}>
+              Economic Indicator
+            </Form.Label>
             <Col>
               <Form.Select
                 value={searchParams.get("indicator")}
                 onChange={updateIndicatorFilter}
               >
                 <option>-Select an economic indicator-</option>
-                {indicators.map((indicator) => <option value={indicator.id}>{indicator.name} ({indicator.short_name})</option>)}
+                {indicators.map((indicator) => (
+                  <option value={indicator.id}>
+                    {indicator.name} ({indicator.short_name})
+                  </option>
+                ))}
               </Form.Select>
             </Col>
           </Form.Group>
         </div>
 
-        {showUnsaved && 
+        {showUnsaved && (
           <Alert className="my-5" key="warning" variant="warning">
             <div className="d-flex align-items-center">
-              <span>You have <b>unsaved changes</b>! Remember to save your changes before leaving this page.</span>
-              <Button className="ms-auto" variant="success" onClick={save}>Save</Button>
+              <span>
+                You have <b>unsaved changes</b>! Remember to save your changes
+                before leaving this page.
+              </span>
+              <Button className="ms-auto" variant="success" onClick={save}>
+                Save
+              </Button>
             </div>
           </Alert>
-        }
+        )}
 
         <Container className="mb-3">
-          <h1 className="mb-3">Values</h1>
-          
+          <h4 className="mb-3">
+            <MdOutlineFeaturedPlayList />
+            &nbsp;Values
+          </h4>
+
           <Row className="mb-5">
             <Col md={3}>
-              <Button
-                className="w-100 mb-2"
-                onClick={add}
-              >
-                Create entry
+              <Button className="w-100 mb-2 text-white" onClick={add}>
+                <IoIosAddCircleOutline /> Create
+              </Button>
+            </Col>
+
+            <Col md={3}>
+              <Button className="w-100 mb-2" variant="danger" onClick={remove}>
+                <AiFillDelete /> Delete
               </Button>
             </Col>
 
             <Col md={3}>
               <Button
                 className="w-100 mb-2"
-                variant="danger"
-                onClick={remove}
-              >
-                Delete selected
-              </Button>
-            </Col>
-
-            <Col md={3}>
-              <Button 
-                className="w-100 mb-2" 
-                variant="success" 
+                variant="success"
                 onClick={save}
                 disabled={!showUnsaved}
               >
-                Save Changes
+                <AiFillSave /> Save
               </Button>
             </Col>
 
             <Col>
-              <Button 
-                className="w-100" 
+              <Button
+                className="w-100"
                 variant="secondary"
                 onClick={discard}
                 disabled={!showUnsaved}
               >
-                Discard
+                <MdCancel /> Discard
               </Button>
             </Col>
           </Row>
 
-          {/* <hr className="mb-5" /> */}
-          
-          {values.length > 0 ? ( values.map((entry, idx) => (
-            <Row className={`mb-3 ${getBorderStyle(entry)}`}>
-              <Col xs={1}>
-                <div className="d-flex align-items-center" style={{ minHeight: "75%" }}>
-                  <Form.Check 
-                    type="checkbox"
-                    checked={entry.selected}
-                    onChange={(e) => select(e, idx)}
+          {values.length > 0 ? (
+            values.map((entry, idx) => (
+              <Row className={`mb-3 ${getBorderStyle(entry)}`}>
+                <Col xs={1}>
+                  <div
+                    className="d-flex align-items-center"
+                    style={{ minHeight: "75%" }}
+                  >
+                    <Form.Check
+                      type="checkbox"
+                      checked={entry.selected}
+                      onChange={(e) => select(e, idx)}
+                    />
+                  </div>
+                </Col>
+                <Col xs={3} className="mb-2">
+                  <Form.Control
+                    type="number"
+                    min="1000"
+                    max="3000"
+                    step="1"
+                    name="year"
+                    placeholder="Year"
+                    value={entry.year}
+                    onChange={(e) => edit(e, idx)}
                   />
-                </div>
-              </Col>
-              <Col xs={3} className="mb-2">
-                <Form.Control
-                  type="number"
-                  min="1000"
-                  max="3000"
-                  step="1"
-                  name="year"
-                  value={entry.year}
-                  onChange={(e) => edit(e, idx)}
-                />
-              </Col>
-              <Col className="mb-2">
-                <Form.Control
-                  className="text-center"
-                  type="text"
-                  name="value"
-                  value={entry.value}
-                  onChange={(e) => edit(e, idx)}
-                />
-              </Col>
-            </Row>
-          ))) : (
+                </Col>
+                <Col className="mb-2">
+                  <Form.Control
+                    className="text-center"
+                    type="text"
+                    name="value"
+                    placeholder="Value"
+                    value={entry.value}
+                    onChange={(e) => edit(e, idx)}
+                  />
+                </Col>
+              </Row>
+            ))
+          ) : (
             <>No available data</>
           )}
         </Container>
