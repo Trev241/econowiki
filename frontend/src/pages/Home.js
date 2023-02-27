@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -8,6 +8,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
+import { AuthContext } from "../components/AuthProvider";
 
 const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
@@ -21,7 +22,7 @@ export default function Home() {
   const [countries, setCountries] = useState([]);
 
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth0();
+  const { isAuthenticated } = useContext(AuthContext)
 
   useEffect(() => {
     async function fetchData() {

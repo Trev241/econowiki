@@ -1,22 +1,25 @@
-import React from "react";
+import React, { useContext } from "react";
 import Container from "react-bootstrap/esm/Container";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
-import { Link } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
+import { Link, useNavigate } from "react-router-dom";
+// import { useAuth0 } from "@auth0/auth0-react";
 // import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { GiWorld } from "react-icons/gi";
+import { AuthContext } from "./AuthProvider";
 
 export default function NavigationBar() {
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  // const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { user, isAuthenticated, logout } = useContext(AuthContext)
+  const navigate = useNavigate()
+
   return (
     <Navbar
       collapseOnSelect
       expand="lg"
       bg="dark"
       variant="dark"
-      className="p-4"
     >
       <Container>
         <Navbar.Brand>
@@ -31,14 +34,14 @@ export default function NavigationBar() {
             {!isAuthenticated ? (
               <Button
                 variant="outline-secondary"
-                onClick={() => loginWithRedirect()}
+                onClick={async () => navigate("/login")}
                 size="sm"
               >
                 Login
               </Button>
             ) : (
               <Nav.Link>
-                <img
+                {/* <img
                   src={user.picture}
                   alt={"User-Avatar"}
                   referrerPolicy="no-referrer"
@@ -48,9 +51,9 @@ export default function NavigationBar() {
                     width: "50px",
                     heigth: "50px",
                   }}
-                />
+                /> */}
                 <span style={{ fontSize: "0.8rem" }}>
-                  &nbsp;&nbsp;{user.name}
+                  &nbsp;&nbsp;{user.username}
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span>
                 <Button

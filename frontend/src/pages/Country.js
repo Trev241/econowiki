@@ -14,7 +14,6 @@ import Col from "react-bootstrap/Col";
 
 import CountryInfo from "../components/CountryInfo";
 import Spinner from "../components/Spinner";
-import { useIsAuth } from "../hooks/useIsAuth";
 
 const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
@@ -102,8 +101,6 @@ export default function Country() {
       setCentered(true);
     }
   });
-
-  useIsAuth();
 
   return (
     <>

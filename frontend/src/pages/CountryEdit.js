@@ -14,7 +14,6 @@ import { FaCheck } from "react-icons/fa";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { useSearchParams } from "react-router-dom";
 import Spinner from "../components/Spinner";
-import { useIsAuth } from "../hooks/useIsAuth";
 
 export default function CountryEdit() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -88,8 +87,6 @@ export default function CountryEdit() {
 
     fetchData();
   }, [searchParams, countries, indicators, showError]);
-
-  useIsAuth();
 
   const updateCountryFilter = useCallback(
     (e) => {
