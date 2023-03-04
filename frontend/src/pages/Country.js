@@ -39,7 +39,9 @@ export default function Country() {
     setInfoLoading(true);
 
     axios
-      .get("http://localhost:5001/country/" + params.id)
+      .get("http://localhost:5001/country/" + params.id, {
+        withCredentials: true,
+      })
       .then(({ data }) => {
         setCountry(data);
       })
@@ -50,7 +52,7 @@ export default function Country() {
         setCountryLoading(false);
       });
     axios
-      .get("http://localhost:5001/indicator")
+      .get("http://localhost:5001/indicator", { withCredentials: true })
       .then(({ data }) => {
         setIndicators(data);
       })
@@ -62,7 +64,9 @@ export default function Country() {
       });
 
     axios
-      .get("http://localhost:5001/value/" + params.id)
+      .get("http://localhost:5001/value/" + params.id, {
+        withCredentials: true,
+      })
       .then(({ data }) => {
         setInfo(data);
       })

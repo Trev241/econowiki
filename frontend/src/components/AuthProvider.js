@@ -1,50 +1,24 @@
-import { createContext, useCallback, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import authService from "../services/AuthService"
+import { createContext, useMemo, useState } from "react";
 
-const AuthContext = createContext()
+const AuthContext = createContext();
 
 function AuthProvider({ children }) {
-  const [user, setUser] = useState()
-  const [isAuthenticated, setAuthenticated] = useState(false)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const navigate = useNavigate()
-
-  const login = useCallback(async (username, password) => {
-    const user = await authService.login(username, password)
-
-    // Access token valid
-    if (user?.access_token) {
-      sessionStorage.setItem("user", user)
-      setUser(user)
-      setAuthenticated(true) 
-    
-      return true
-    }
-
-    return false
-  }, [])
-
-  const logout = useCallback(() => {
-    sessionStorage.removeItem("user")
-    setUser(null)
-    setAuthenticated(false)
-
-    navigate("/")
-  }, [navigate])
-
-  const contextValue = useMemo(() => ({
-    user,
-    isAuthenticated,
-    login,
-    logout
-  }), [user, isAuthenticated, login, logout])
+  const contextValue = useMemo(
+    () => ({
+      user,
+      setUser,
+      loading,
+      setLoading,
+    }),
+    [user, loading]
+  );
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  )
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 }
 
-export { AuthContext, AuthProvider }
+export { AuthContext, AuthProvider };

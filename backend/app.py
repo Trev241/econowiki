@@ -12,8 +12,8 @@ load_dotenv()
 
 app = Flask(__name__)
 cors = CORS(app, resources={
-    r'*': { 'origins': '*' }
-})
+    r'*': { 'origins': 'http://localhost:3000' },
+}, supports_credentials=True)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -25,10 +25,14 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 # Setting up Flask-JWT extension
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET')
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)
 
 from routes import *
 
 if __name__ == '__main__':
+    # from models import User
+    # User.__table__.drop(db.engine)
+
+    # db.create_all()
     app.run(debug=True, port=5001)

@@ -1,34 +1,35 @@
-import axios from "axios"
+import axios from "axios";
 
-const API_URL = "http://localhost:5001/auth"
+const API_URL = "http://localhost:5001/auth";
 
 class AuthService {
-  async login(username, password) {
-    return axios
-      .post(`${API_URL}/signin`, {
-        username,
-        password
-      })
-      .then(response => {
-        return response.data
-      })
-      .catch(error => {
-        return error
-      })
+  login(nameOrEmail, password) {
+    return axios.post(
+      `${API_URL}/signin`,
+      {
+        nameOrEmail,
+        password,
+      },
+      {
+        withCredentials: true,
+      }
+    );
   }
 
   register(email, username, password) {
-    return axios
-      .post(`${API_URL}/signup`, {
+    return axios.post(
+      `${API_URL}/signup`,
+      {
         email,
         username,
-        password
-      })
-      .catch(error => {
-        return error
-      })
+        password,
+      },
+      {
+        withCredentials: true,
+      }
+    );
   }
 }
 
-const authService = new AuthService()
-export default authService
+const authService = new AuthService();
+export default authService;

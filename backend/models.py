@@ -1,5 +1,6 @@
 from app import db, ma
 from datetime import datetime
+from enum import Enum
 
 class Country(db.Model):
     __tablename__ = 'country'
@@ -68,6 +69,11 @@ class CountryIndicatorValueSchema(ma.Schema):
 country_val_schema = CountryIndicatorValueSchema()
 country_vals_schema = CountryIndicatorValueSchema(many=True)
 
+class UserType(str, Enum):
+    ADMINISTRATOR = "ADMINISTRATOR"
+    MODERATOR = "MODERATOR"
+    MEMBER = "MEMBER" 
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -75,17 +81,21 @@ class User(db.Model):
     email = db.Column(db.String(64), unique=True, nullable=False)
     username = db.Column(db.String(64), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
-    creation_datetime = db.Column(db.DateTime(), nullable=False)
+    accepted = db.Column(db.Boolean())
+    type = db.Column(db.Enum(UserType))
+    createdAt = db.Column(db.DateTime(), nullable=False)
 
-    def __init__(self, username, email, password):
+    def __init__(self, username, email, password, accepted, type):
         self.email = email
         self.username = username
         self.password = password
-        self.creation_datetime = datetime.now()
+        self.accepted = accepted
+        self.type = type
+        self.createdAt = datetime.now()
 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('email', 'username', 'creation_datetime')
+        fields = ('id', 'email', 'username', 'accepted', 'type', 'createdAt')
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)

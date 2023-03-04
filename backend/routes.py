@@ -1,5 +1,5 @@
 from app import app, db
-from flask import jsonify, request
+from flask import jsonify, request, make_response
 from flask_jwt_extended import create_access_token
 from models import (
     Country,
@@ -14,6 +14,9 @@ from models import (
     User,
     user_schema
 )
+from middleware import isNotAuth, isAuth
+import bcrypt
+import re
 
 @app.route('/country', methods=['GET'])
 def get_countries():
@@ -42,6 +45,7 @@ def get_indicator(short_name: str):
     return eco_indicator_schema.jsonify(indicator), 200
 
 @app.route('/value/<iso_alpha_3_code>', methods=['GET'])
+@isAuth()
 def get_values(iso_alpha_3_code: str):
     id = Country.query.filter_by(iso_alpha_3_code=iso_alpha_3_code).one().id
     values = CountryIndicatorValue.query.filter_by(country_id=id).all()
@@ -50,6 +54,7 @@ def get_values(iso_alpha_3_code: str):
     return jsonify(result), 200
 
 @app.route('/value/add', methods=['POST'])
+@isAuth()
 def add_value():
     new_value = CountryIndicatorValue(
         country_id=request.json.get('country_id', None), 
@@ -64,6 +69,7 @@ def add_value():
     return country_val_schema.jsonify(new_value), 200
 
 @app.route('/value/update/<id>', methods=['PUT'])
+@isAuth()
 def update_value(id: int):
     entry = CountryIndicatorValue.query.get(id)
 
@@ -77,6 +83,7 @@ def update_value(id: int):
     return country_val_schema.jsonify(entry), 200
 
 @app.route('/value/<id>', methods=['DELETE'])
+@isAuth()
 def delete_value(id: int):
     entry = CountryIndicatorValue.query.get(id)
     db.session.delete(entry)
@@ -85,37 +92,62 @@ def delete_value(id: int):
     return country_val_schema.jsonify(entry), 200
 
 @app.route('/auth/signin', methods=['POST'])
+@isNotAuth()
 def login():
-    email = request.json.get('email', None)
-    username = request.json.get('username', None)
+    kwargs = {}
 
-    kwargs = {'password': request.json.get('password', None)}
-    if username:
-        kwargs['username'] = username
+    nameOrEmail = request.json.get('nameOrEmail', None)
+    emailRegex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+    if re.fullmatch(emailRegex, nameOrEmail):
+        kwargs['email'] = nameOrEmail
     else:
-        kwargs['email'] = email 
-    
-    print(kwargs)
+        kwargs['username'] = nameOrEmail
 
     try:
         user = User.query.filter_by(**kwargs).one()
-        access_token = create_access_token(identity=user.username)
+        if not bcrypt.checkpw(request.json.get('password', None).encode('utf-8'),
+            user.password):
+            raise Exception("Wrong credentials!")
+
+        token = create_access_token(identity=user.id, expires_delta=False)
+        response = make_response(jsonify({'user': user_schema.jsonify(user).json,
+            'status': 200}))
+        response.set_cookie('token', token, 60 * 60 * 24 * 7)
+        return response
         
-        return jsonify(access_token=access_token)
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({
-            'message': 'Invalid credentials'
-        }), 401
+            'status': 401,
+            'message': 'Wrong credentials!'
+        })
 
 @app.route('/auth/signup', methods=['POST'])
+@isNotAuth()
 def create_user():
     user = User(
         email=request.json.get('email', None),
         username=request.json.get('username', None),
-        password=request.json.get('password', None)
+        password=bcrypt.hashpw(request.json.get('password', None).encode('utf-8'),
+            bcrypt.gensalt(12)),
+        accepted=request.json.get('accepted', False),
+        type=request.json.get('type', None)
     )
 
     db.session.add(user)
     db.session.commit()
 
-    return user_schema.jsonify(user), 200
+    return jsonify({'status': 200})
+
+@app.route('/auth/logout', methods=['POST'])
+@isAuth()
+def logout_user():
+    response = make_response(jsonify({'status': 200}))
+    response.set_cookie('token', '', 0)
+    return response
+
+@app.route('/auth/user', methods=['GET'])
+@isAuth()
+def get_user():
+    user = User.query.get(request.uid)
+    return jsonify({'status': 200, 'user': user_schema.jsonify(user).json})

@@ -1,19 +1,17 @@
-import React, { useContext } from "react"
-import Error from "../pages/Error"
-import { AuthContext } from "./AuthProvider"
+import React, { useContext } from "react";
+import { Navigate } from "react-router-dom";
+import { AuthContext } from "./AuthProvider";
 
-export default function AuthenticationGuard({ component }) {
-  const { isAuthenticated } = useContext(AuthContext)
-  const ProtectedComponent = component
+export function Private({ component }) {
+  const { user } = useContext(AuthContext);
+  const ProtectedComponent = component;
 
-  return isAuthenticated ? (
-    <ProtectedComponent />
-  ) : (
-    <Error
-      error={{
-        heading: "Unauthorized Access",
-        message: "You must be logged in to access this page."
-      }}
-    />
-  )
+  return user ? <ProtectedComponent /> : <Navigate to={"/login"} />;
+}
+
+export function Public({ component }) {
+  const { user } = useContext(AuthContext);
+  const PublicComponent = component;
+
+  return !user ? <PublicComponent /> : <Navigate to={"/"} />;
 }

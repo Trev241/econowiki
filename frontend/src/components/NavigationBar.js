@@ -1,26 +1,33 @@
-import React, { useContext } from "react";
+import React, { useCallback, useContext } from "react";
 import Container from "react-bootstrap/esm/Container";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import { Link, useNavigate } from "react-router-dom";
-// import { useAuth0 } from "@auth0/auth0-react";
 // import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { GiWorld } from "react-icons/gi";
 import { AuthContext } from "./AuthProvider";
+import axios from "axios";
 
 export default function NavigationBar() {
-  // const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
-  const { user, isAuthenticated, logout } = useContext(AuthContext)
-  const navigate = useNavigate()
+  const { user, setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const logout = useCallback(() => {
+    axios
+      .post("http://localhost:5001/auth/logout", undefined, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        if (res.data.status === 200) {
+          navigate("/");
+          setUser(null);
+        }
+      });
+  }, [navigate, setUser]);
 
   return (
-    <Navbar
-      collapseOnSelect
-      expand="lg"
-      bg="dark"
-      variant="dark"
-    >
+    <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
       <Container>
         <Navbar.Brand>
           <Link to={"/"} className="text-decoration-none text-white">
@@ -31,10 +38,10 @@ export default function NavigationBar() {
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto"></Nav>
           <Nav>
-            {!isAuthenticated ? (
+            {!user ? (
               <Button
                 variant="outline-secondary"
-                onClick={async () => navigate("/login")}
+                onClick={() => navigate("/login")}
                 size="sm"
               >
                 Login
@@ -53,18 +60,10 @@ export default function NavigationBar() {
                   }}
                 /> */}
                 <span style={{ fontSize: "0.8rem" }}>
-                  &nbsp;&nbsp;{user.username}
+                  &nbsp;&nbsp;@{user.username}
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span>
-                <Button
-                  variant="outline-secondary"
-                  onClick={() =>
-                    logout({
-                      logoutParams: { returnTo: window.location.origin },
-                    })
-                  }
-                  size="sm"
-                >
+                <Button variant="outline-secondary" onClick={logout} size="sm">
                   Logout
                 </Button>
               </Nav.Link>

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth0 } from "@auth0/auth0-react";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -22,11 +21,13 @@ export default function Home() {
   const [countries, setCountries] = useState([]);
 
   const navigate = useNavigate();
-  const { isAuthenticated } = useContext(AuthContext)
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     async function fetchData() {
-      const response = await axios.get("http://localhost:5001/country");
+      const response = await axios.get("http://localhost:5001/country", {
+        withCredentials: true,
+      });
       setCountries(response.data);
     }
 
@@ -57,7 +58,7 @@ export default function Home() {
                     value={selectedGeo.id}
                     aria-label="Select a country"
                     onChange={(e) => navigate(`/${e.target.value}`)}
-                    disabled={!isAuthenticated}
+                    disabled={!user}
                   >
                     <option>{">"} &nbsp;Select a country</option>
                     {countries.map((country, i) => (
@@ -102,9 +103,7 @@ export default function Home() {
                           },
                         }}
                         fill={SELECTED_GEO_FILL}
-                        onClick={() =>
-                          isAuthenticated && navigate(`/${selectedGeo.id}`)
-                        }
+                        onClick={() => user && navigate(`/${selectedGeo.id}`)}
                         onMouseEnter={() => {
                           setSelectedGeo({
                             id: geo.id,
