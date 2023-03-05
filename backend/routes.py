@@ -12,7 +12,8 @@ from models import (
     country_val_schema,
     country_vals_schema,
     User,
-    user_schema
+    user_schema,
+    users_schema
 )
 from middleware import isNotAuth, isAuth
 import bcrypt
@@ -151,3 +152,14 @@ def logout_user():
 def get_user():
     user = User.query.get(request.uid)
     return jsonify({'status': 200, 'user': user_schema.jsonify(user).json})
+
+@app.route('/users/<accepted>', methods=['GET'])
+@isAuth()
+def get_users(accepted=0):
+    users = []
+    if int(accepted) == 0:
+        users = User.query.filter(User.accepted == False and User.id != request.uid).all()
+    else:
+        users = User.query.filter(User.accepted == True).all()
+    users = users_schema.dump(users)
+    return jsonify({'status': 200, 'users': jsonify(users).json})

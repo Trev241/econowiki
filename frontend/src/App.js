@@ -9,6 +9,7 @@ import Country from "./pages/Country";
 import CountryEdit from "./pages/CountryEdit";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 import "./App.css";
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
         <Route element={<Public component={Login} />} path="/login" />
         <Route element={<Private component={Country} />} path="/:id" />
         <Route element={<Private component={CountryEdit} />} path="/edit" />
+        <Route element={<Private component={Dashboard} />} path="/dashboard" />
       </Routes>
     </BrowserRouter>
   );

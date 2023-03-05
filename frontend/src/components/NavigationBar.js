@@ -1,13 +1,15 @@
 import React, { useCallback, useContext, useEffect, useRef } from "react";
-import Container from "react-bootstrap/esm/Container";
-import Navbar from "react-bootstrap/Navbar";
-import Nav from "react-bootstrap/Nav";
-import { Link, useNavigate } from "react-router-dom";
-import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { GiWorld } from "react-icons/gi";
-import { AuthContext } from "./AuthProvider";
+import Container from "react-bootstrap/esm/Container";
+import Form from "react-bootstrap/Form";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import { useNavigate } from "react-router-dom";
 import { cAxios } from "../constants";
+import { AuthContext } from "./AuthProvider";
+import Logo from "./Logo";
+import { HiLogout } from "react-icons/hi";
+import { MdDashboard } from "react-icons/md";
 
 export default function NavigationBar() {
   const { user, setUser, countries, setCountries, country, setCountry } =
@@ -38,24 +40,17 @@ export default function NavigationBar() {
   return (
     <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
       <Container>
-        <Link
-          to={"/"}
-          className="text-decoration-none text-white"
-          style={{
-            fontFamily: "monospace",
-          }}
-        >
-          <GiWorld size={"50px"} /> World Income
-        </Link>
+        <Logo color={"white"} />
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto"></Nav>
           <Nav className="d-flex align-items-center">
             <Form.Select
-              className="bg-dark text-white h-25 mx-5"
+              className="bg-dark text-white h-25"
               style={{
                 fontFamily: "monospace",
                 fontSize: "0.8rem",
+                marginRight: "4rem",
               }}
               aria-label="Select a country"
               onChange={(e) => {
@@ -101,10 +96,18 @@ export default function NavigationBar() {
                   style={{ fontSize: "0.8rem", color: "rgb(200, 200, 200)" }}
                 >
                   &nbsp;&nbsp;@{user.username}
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  &nbsp;&nbsp;&nbsp;
                 </span>
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => navigate("/dashboard")}
+                  className="mx-2"
+                >
+                  <MdDashboard />
+                </Button>
                 <Button variant="outline-secondary" onClick={logout} size="sm">
-                  Logout
+                  <HiLogout />
                 </Button>
               </>
             )}

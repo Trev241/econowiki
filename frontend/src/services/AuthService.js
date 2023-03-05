@@ -3,7 +3,7 @@ import { cAxios } from "../constants";
 class AuthService {
   login(nameOrEmail, password) {
     return cAxios.post(
-      `/signin`,
+      `/auth/signin`,
       {
         nameOrEmail,
         password,
@@ -16,7 +16,7 @@ class AuthService {
 
   register(email, username, password) {
     return cAxios.post(
-      `/signup`,
+      `/auth/signup`,
       {
         email,
         username,

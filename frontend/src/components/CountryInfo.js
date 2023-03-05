@@ -40,8 +40,6 @@ export default function CountryInfo({ country, info, indicators }) {
     return result;
   }, [info]);
 
-  console.log(modData);
-
   const handleSelectChange = useCallback(async (e) => {
     setOtherCountries((prev) => [...prev, e.target.value]);
   }, []);

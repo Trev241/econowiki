@@ -7,6 +7,7 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
+import Logo from "../components/Logo";
 import authService from "../services/AuthService";
 
 export default function Login() {
@@ -51,7 +52,10 @@ export default function Login() {
                 borderColor: "rgb(180, 180, 180)",
               }}
             >
-              <h1 className="mb-5">Login</h1>
+              <Logo
+                color={"dark"}
+                styles={{ textAlign: "center", marginBottom: "2rem" }}
+              />
 
               {showFailedAlert && (
                 <Alert className="mb-4" variant="danger">
@@ -63,6 +67,7 @@ export default function Login() {
                 <Form.Label>Name/Email</Form.Label>
                 <Form.Control
                   type="text"
+                  autoFocus
                   name="nameOrEmail"
                   value={form.username}
                   onChange={(e) => updateForm(e)}
@@ -80,7 +85,7 @@ export default function Login() {
               </Form.Group>
 
               <Button className="w-100" type="submit">
-                Submit
+                Login
               </Button>
             </Form>
           </Col>
