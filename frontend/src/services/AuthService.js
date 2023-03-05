@@ -1,11 +1,9 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:5001/auth";
+import { cAxios } from "../constants";
 
 class AuthService {
   login(nameOrEmail, password) {
-    return axios.post(
-      `${API_URL}/signin`,
+    return cAxios.post(
+      `/signin`,
       {
         nameOrEmail,
         password,
@@ -17,8 +15,8 @@ class AuthService {
   }
 
   register(email, username, password) {
-    return axios.post(
-      `${API_URL}/signup`,
+    return cAxios.post(
+      `/signup`,
       {
         email,
         username,

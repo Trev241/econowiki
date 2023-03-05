@@ -23,13 +23,13 @@ def get_countries():
     countries = Country.query.all()
     result = countries_schema.dump(countries)
 
-    return jsonify(result), 200
+    return jsonify({'status': 200, 'countries': jsonify(result).json})
 
 @app.route('/country/<iso_alpha_3_code>', methods=['GET'])
 def get_country(iso_alpha_3_code: str):
     country = Country.query.filter_by(iso_alpha_3_code=iso_alpha_3_code.upper()).one()
     
-    return country_schema.jsonify(country), 200
+    return jsonify({'status': 200, 'country': country_schema.jsonify(country).json}) 
 
 @app.route('/indicator', methods=['GET'])
 def get_indicators():
@@ -130,7 +130,7 @@ def create_user():
         username=request.json.get('username', None),
         password=bcrypt.hashpw(request.json.get('password', None).encode('utf-8'),
             bcrypt.gensalt(12)),
-        accepted=request.json.get('accepted', False),
+        accepted=False,
         type=request.json.get('type', None)
     )
 

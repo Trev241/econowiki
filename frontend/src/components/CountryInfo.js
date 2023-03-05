@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -17,33 +17,20 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import axios from "axios";
 
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Form from "react-bootstrap/Form";
 import Badge from "react-bootstrap/Badge";
+import Container from "react-bootstrap/Container";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 import { VscListSelection } from "react-icons/vsc";
 
 import { mergeData } from "../utils";
+import { AuthContext } from "./AuthProvider";
 import Chart from "./Chart";
 
 export default function CountryInfo({ country, info, indicators }) {
-  const [countries, setCountries] = useState([]);
   const [otherCountries, setOtherCountries] = useState([]);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await axios.get("http://localhost:5001/country");
-        setCountries(response.data);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const { countries } = useContext(AuthContext);
 
   const modData = useMemo(() => {
     const result = [...Array(9)].map(() => []);
@@ -52,6 +39,8 @@ export default function CountryInfo({ country, info, indicators }) {
     }
     return result;
   }, [info]);
+
+  console.log(modData);
 
   const handleSelectChange = useCallback(async (e) => {
     setOtherCountries((prev) => [...prev, e.target.value]);
@@ -63,7 +52,7 @@ export default function CountryInfo({ country, info, indicators }) {
         <span className="m-2">
           <VscListSelection /> &nbsp;Comparison
         </span>
-        <div>
+        <div className="d-flex align-items-center">
           <Form.Select
             className="me-2"
             onChange={handleSelectChange}
@@ -71,6 +60,7 @@ export default function CountryInfo({ country, info, indicators }) {
               fontFamily: "monospace",
               fontSize: "0.8rem",
             }}
+            disabled={otherCountries.length >= 10}
           >
             <option> {">"} Select a country</option>
             {countries.map((country, i) => (
@@ -83,14 +73,18 @@ export default function CountryInfo({ country, info, indicators }) {
               </option>
             ))}
           </Form.Select>
+          <span style={{ color: "rgb(150, 150, 150)" }}>
+            {otherCountries.length}&nbsp;/&nbsp;10
+          </span>
         </div>
         <div className="p-2">
           {otherCountries.map((iso3, i) => (
             <Badge bg="dark" key={i} className={"m-2 p-3"}>
               <span
-                className="bg-white text-dark rounded-circle px-1"
+                className="border border-white text-white rounded-circle px-1"
                 style={{
                   cursor: "pointer",
+                  fontSize: "0.7rem",
                 }}
                 onClick={() =>
                   setOtherCountries(

@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -14,6 +13,7 @@ import Col from "react-bootstrap/Col";
 
 import CountryInfo from "../components/CountryInfo";
 import Spinner from "../components/Spinner";
+import { cAxios } from "../constants";
 
 const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
@@ -38,21 +38,18 @@ export default function Country() {
     setIndicatorLoading(true);
     setInfoLoading(true);
 
-    axios
-      .get("http://localhost:5001/country/" + params.id, {
-        withCredentials: true,
-      })
+    cAxios
+      .get("/country/" + params.id)
       .then(({ data }) => {
-        setCountry(data);
-      })
-      .catch((err) => {
-        console.error(err);
+        if (data.status === 200) {
+          setCountry(data.country);
+        }
       })
       .finally(() => {
         setCountryLoading(false);
       });
-    axios
-      .get("http://localhost:5001/indicator", { withCredentials: true })
+    cAxios
+      .get("/indicator")
       .then(({ data }) => {
         setIndicators(data);
       })
@@ -63,10 +60,8 @@ export default function Country() {
         setIndicatorLoading(false);
       });
 
-    axios
-      .get("http://localhost:5001/value/" + params.id, {
-        withCredentials: true,
-      })
+    cAxios
+      .get("/value/" + params.id)
       .then(({ data }) => {
         setInfo(data);
       })
@@ -76,7 +71,7 @@ export default function Country() {
       .finally(() => {
         setInfoLoading(false);
       });
-  }, [params.id]);
+  }, [params]);
 
   useEffect(() => {
     if (geoRef.current && !centered) {

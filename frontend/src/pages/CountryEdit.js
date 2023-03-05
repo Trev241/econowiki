@@ -1,4 +1,3 @@
-import axios from "axios";
 import HTMLParser from "html-react-parser";
 import React, { useCallback, useEffect, useState } from "react";
 import Alert from "react-bootstrap/Alert";
@@ -14,6 +13,8 @@ import { FaCheck } from "react-icons/fa";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { useSearchParams } from "react-router-dom";
 import Spinner from "../components/Spinner";
+import { cAxios } from "../constants";
+import { TbMoodEmpty } from "react-icons/tb";
 
 export default function CountryEdit() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -43,11 +44,13 @@ export default function CountryEdit() {
       try {
         let response;
 
-        response = await axios.get(`http://localhost:5001/indicator`);
+        response = await cAxios.get(`/indicator`);
         setIndicators(response.data);
 
-        response = await axios.get(`http://localhost:5001/country`);
-        setCountries(response.data);
+        response = await cAxios.get(`/country`);
+        if (response.data.status === 200) {
+          setCountries(response.data.countries);
+        }
       } catch (error) {
         showError(error);
       }
@@ -62,15 +65,13 @@ export default function CountryEdit() {
         let response;
 
         // Fetch country
-        response = await axios.get(
-          `http://localhost:5001/country/${searchParams.get("country")}`
-        );
-        setCountry(response.data);
+        response = await cAxios.get(`/country/${searchParams.get("country")}`);
+        if (response.data.status) {
+          setCountry(response.data.country);
+        }
 
         // Fetch values of country
-        response = await axios.get(
-          `http://localhost:5001/value/${searchParams.get("country")}`
-        );
+        response = await cAxios.get(`/value/${searchParams.get("country")}`);
         const results = response.data;
         const filtered = results.filter(
           (entry) => entry.indicator_id === +searchParams.get("indicator")
@@ -150,8 +151,8 @@ export default function CountryEdit() {
       for (const entry of values) {
         if (entry.selected) {
           if (!entry.addition) {
-            await axios
-              .delete(`http://localhost:5001/value/${entry.id}`)
+            await cAxios
+              .delete(`/value/${entry.id}`)
               .then(() => years.push(entry.year))
               .catch(() => {
                 setAlert({
@@ -403,7 +404,9 @@ export default function CountryEdit() {
               </Row>
             ))
           ) : (
-            <>No available data</>
+            <p className="h6 text-center">
+              <TbMoodEmpty /> No data available!
+            </p>
           )}
         </Container>
       </Container>
