@@ -1,8 +1,9 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import Accordion from "react-bootstrap/Accordion";
 import Container from "react-bootstrap/Container";
-import Button from "react-bootstrap/esm/Button";
 import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/esm/Button";
 import { AiOutlineDelete, AiOutlineUser } from "react-icons/ai";
 import { BiBookAlt, BiUserPin } from "react-icons/bi";
 import { FiEdit2 } from "react-icons/fi";
@@ -27,89 +28,91 @@ function Item({
 }) {
   const { user: authUser } = useContext(AuthContext);
   return (
-    <div className="d-flex justify-content-between align-items-center m-2">
-      <div className="w-25">
-        <img
-          src="/noImg.webp"
-          alt={"User-Avatar"}
-          className="p-1 rounded-circle"
-          style={{
-            border: "1px solid rgb(200, 200, 200)",
-            width: "40px",
-            heigth: "40px",
-          }}
-        />
-        <span
-          className="mx-2"
-          style={{
-            fontSize: "0.8rem",
-          }}
-        >
-          @{user.username}
-        </span>
-      </div>
-      {!isPending && (
-        <>
-          <div style={{ fontSize: ".8rem" }} className="w-25">
-            {user.email}
-          </div>
-          <div style={{ fontSize: "0.8rem" }} className="w-25 text-center">
-            {user.type === UserType.ADMINISTRATOR ? (
-              <GrUserAdmin />
-            ) : user.type === UserType.MODERATOR ? (
-              <RiAdminLine />
-            ) : (
-              <AiOutlineUser />
-            )}
-            &nbsp;&nbsp;{user.type}
-          </div>
-        </>
-      )}
-
-      <div style={{ fontSize: ".8rem" }} className="w-25 text-center">
-        {new Date(user.createdAt).toLocaleString()}
-      </div>
-
-      <div className="w-25 d-flex justify-content-end">
-        {isPending ? (
+    <Container className="my-2">
+      <Row>
+        <Col md>
+          <img
+            src="/noImg.webp"
+            alt={"User-Avatar"}
+            className="p-1 rounded-circle"
+            style={{
+              border: "1px solid rgb(200, 200, 200)",
+              width: "40px",
+              heigth: "40px",
+            }}
+          />
+          <span
+            className="mx-2"
+            style={{
+              fontSize: "0.8rem",
+            }}
+          >
+            @{user.username}
+          </span>
+        </Col>
+        {!isPending && (
           <>
-            <Button
-              variant="outline-success"
-              size="sm"
-              className="mx-2"
-              onClick={() => acceptUser(user)}
-            >
-              <TiTick />
-            </Button>
+            <Col md className="d-flex align-items-center" style={{ fontSize: ".8rem" }}>
+              {user.email}
+            </Col>
+            
+            <Col md className="d-flex align-items-center" style={{ fontSize: ".8rem" }} >
+              {user.type === UserType.ADMINISTRATOR ? (
+                <GrUserAdmin />
+              ) : user.type === UserType.MODERATOR ? (
+                <RiAdminLine />
+              ) : (
+                <AiOutlineUser />
+              )}
+              &nbsp;&nbsp;{user.type}
+            </Col>
           </>
-        ) : (
-          user.id !== authUser.id && (
-            <>
-              {user.type !== UserType.ADMINISTRATOR && (
-                <Button
-                  variant="outline-success"
-                  size="sm"
-                  className="mx-1"
-                  onClick={() => promoteUser(user, 1)}
-                >
-                  <HiOutlineChevronDoubleUp />
-                </Button>
-              )}
-              {user.type !== UserType.MEMBER && (
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  className="mx-1"
-                  onClick={() => promoteUser(user, 0)}
-                >
-                  <HiOutlineChevronDoubleDown />
-                </Button>
-              )}
-            </>
-          )
         )}
-      </div>
-    </div>
+        <Col md className="d-flex align-items-center" style={{ fontSize: ".8rem" }} >
+          {new Date(user.createdAt).toLocaleString()}
+        </Col>
+
+        <Col md className="d-flex align-items-center">
+          {isPending ? (
+            <>
+              <Button
+                variant="outline-success"
+                size="sm"
+                className="mx-2"
+                onClick={() => acceptUser(user)}
+              >
+                <TiTick />
+              </Button>
+            </>
+          ) : (
+            user.id !== authUser.id && (
+              <>
+                {user.type !== UserType.ADMINISTRATOR && (
+                  <Button
+                    variant="outline-success"
+                    size="sm"
+                    className="ms-auto"
+                    onClick={() => promoteUser(user, 1)}
+                  >
+                    <HiOutlineChevronDoubleUp />
+                  </Button>
+                )}
+                {user.type !== UserType.MEMBER && (
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    className="ms-2"
+                    onClick={() => promoteUser(user, 0)}
+                  >
+                    <HiOutlineChevronDoubleDown />
+                  </Button>
+                )}
+              </>
+            )
+          )}
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
@@ -208,82 +211,80 @@ export default function Dashboard() {
         </p>
       </Row>
       <Row>
-        <div className="d-flex flex-column">
-          <div className="d-flex">
-            <Accordion
-              defaultActiveKey="0"
-              style={{ width: "60%" }}
-              className="mx-2"
-            >
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>
-                  <MdPendingActions /> &nbsp;Pending
-                </Accordion.Header>
-                <Accordion.Body>
-                  {pending.map((u) => (
-                    <Item
-                      key={u.id}
-                      user={u}
-                      isPending={true}
-                      acceptUser={acceptUser}
-                    />
-                  ))}
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-            <Accordion
-              defaultActiveKey={"0"}
-              style={{ width: "40%" }}
-              className="mx-2"
-            >
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>
-                  <BiBookAlt /> &nbsp;Logs
-                </Accordion.Header>
-                <Accordion.Body>
-                  {[
-                    {
-                      datetime: "06/Mar/2023 16:19:15",
-                      username: "john",
-                      operation: "CREATE",
-                    },
-                    {
-                      datetime: "06/Mar/2023 16:19:16",
-                      username: "james",
-                      operation: "UPDATE",
-                    },
-                    {
-                      datetime: "06/Mar/2023 16:19:17",
-                      username: "jim",
-                      operation: "DELETE",
-                    },
-                  ].map((l) => (
-                    <Log key={l.datetime} log={l} />
-                  ))}
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-          </div>
-          <div>
-            <Accordion className="mt-5" defaultActiveKey={"0"}>
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>
-                  <BiUserPin /> &nbsp;Users
-                </Accordion.Header>
-                <Accordion.Body>
-                  {users.map((u) => (
-                    <Item
-                      key={u.id}
-                      user={u}
-                      isPending={false}
-                      promoteUser={promoteUser}
-                    />
-                  ))}
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-          </div>
-        </div>
+        <Col xl={8}>
+          <Accordion
+            defaultActiveKey="0"
+            className="mb-4"
+          >
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>
+                <MdPendingActions /> &nbsp;Pending
+              </Accordion.Header>
+              <Accordion.Body>
+                {pending.map((u) => (
+                  <Item
+                    key={u.id}
+                    user={u}
+                    isPending={true}
+                    acceptUser={acceptUser}
+                  />
+                ))}
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </Col>
+        <Col sm>
+          <Accordion
+            defaultActiveKey={"0"}
+            className="mb-4"
+          >
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>
+                <BiBookAlt /> &nbsp;Logs
+              </Accordion.Header>
+              <Accordion.Body>
+                {[
+                  {
+                    datetime: "06/Mar/2023 16:19:15",
+                    username: "john",
+                    operation: "CREATE",
+                  },
+                  {
+                    datetime: "06/Mar/2023 16:19:16",
+                    username: "james",
+                    operation: "UPDATE",
+                  },
+                  {
+                    datetime: "06/Mar/2023 16:19:17",
+                    username: "jim",
+                    operation: "DELETE",
+                  },
+                ].map((l) => (
+                  <Log key={l.datetime} log={l} />
+                ))}
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </Col>
+      </Row>
+      <Row>
+        <Accordion className="mb-4" defaultActiveKey={"0"}>
+          <Accordion.Item eventKey="0">
+            <Accordion.Header>
+              <BiUserPin /> &nbsp;Users
+            </Accordion.Header>
+            <Accordion.Body>
+              {users.map((u) => (
+                <Item
+                  key={u.id}
+                  user={u}
+                  isPending={false}
+                  promoteUser={promoteUser}
+                />
+              ))}
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
       </Row>
     </Container>
   );
