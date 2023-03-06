@@ -5,7 +5,7 @@ import Form from "react-bootstrap/Form";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { useNavigate } from "react-router-dom";
-import { cAxios } from "../constants";
+import { cAxios, UserType } from "../constants";
 import { AuthContext } from "./AuthProvider";
 import Logo from "./Logo";
 import { HiLogout } from "react-icons/hi";
@@ -50,7 +50,7 @@ export default function NavigationBar() {
               style={{
                 fontFamily: "monospace",
                 fontSize: "0.8rem",
-                marginRight: "4rem",
+                marginRight: "1rem",
               }}
               aria-label="Select a country"
               onChange={(e) => {
@@ -98,17 +98,25 @@ export default function NavigationBar() {
                   &nbsp;&nbsp;@{user.username}
                   &nbsp;&nbsp;&nbsp;
                 </span>
-                <Button
-                  variant="outline-secondary"
-                  size="sm"
-                  onClick={() => navigate("/dashboard")}
-                  className="mx-2"
-                >
-                  <MdDashboard />
-                </Button>
-                <Button variant="outline-secondary" onClick={logout} size="sm">
-                  <HiLogout />
-                </Button>
+                <div style={{ marginLeft: "3rem" }} className="d-flex">
+                  {user.type === UserType.ADMINISTRATOR && (
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      onClick={() => navigate("/dashboard")}
+                      className="mx-2"
+                    >
+                      <MdDashboard />
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline-secondary"
+                    onClick={logout}
+                    size="sm"
+                  >
+                    <HiLogout />
+                  </Button>
+                </div>
               </>
             )}
           </Nav>

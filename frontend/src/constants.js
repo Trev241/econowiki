@@ -10,3 +10,11 @@ export const UserType = {
   MODERATOR: "MODERATOR",
   MEMBER: "MEMBER",
 };
+
+export const LogOps = {
+  CREATE: "CREATE",
+  UPDATE: "UPDATE",
+  DELETE: "DELETE",
+};
+
+export const modYears = 5;

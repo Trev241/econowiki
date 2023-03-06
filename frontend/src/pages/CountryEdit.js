@@ -1,5 +1,11 @@
 import HTMLParser from "html-react-parser";
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import Alert from "react-bootstrap/Alert";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
@@ -11,10 +17,11 @@ import { BsFilter } from "react-icons/bs";
 import { MdCancel, MdError, MdOutlineFeaturedPlayList } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import { IoIosAddCircleOutline } from "react-icons/io";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Spinner from "../components/Spinner";
-import { cAxios } from "../constants";
+import { cAxios, modYears, UserType } from "../constants";
 import { TbMoodEmpty } from "react-icons/tb";
+import { AuthContext } from "../components/AuthProvider";
 
 export default function CountryEdit() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -30,6 +37,9 @@ export default function CountryEdit() {
     message: "",
     status: "",
   });
+
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const showError = useCallback((error) => {
     setAlert({
@@ -88,6 +98,12 @@ export default function CountryEdit() {
 
     fetchData();
   }, [searchParams, countries, indicators, showError]);
+
+  useEffect(() => {
+    if (user.type === UserType.MEMBER) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const updateCountryFilter = useCallback(
     (e) => {
@@ -251,6 +267,8 @@ export default function CountryEdit() {
     }
   }, [isNumeric, showError, values]);
 
+  const isModerator = useMemo(() => user.type === UserType.MODERATOR, [user]);
+
   if (!values || !countries || !indicators || !country || !oldValues) {
     return <Spinner />;
   }
@@ -376,6 +394,7 @@ export default function CountryEdit() {
                       type="checkbox"
                       checked={entry.selected}
                       onChange={(e) => select(e, idx)}
+                      disabled={isModerator && idx < values.length - modYears}
                     />
                   </div>
                 </Col>
@@ -389,6 +408,7 @@ export default function CountryEdit() {
                     placeholder="Year"
                     value={entry.year}
                     onChange={(e) => edit(e, idx)}
+                    disabled={isModerator && idx < values.length - modYears}
                   />
                 </Col>
                 <Col className="mb-2">
@@ -399,6 +419,7 @@ export default function CountryEdit() {
                     placeholder="Value"
                     value={entry.value}
                     onChange={(e) => edit(e, idx)}
+                    disabled={isModerator && idx < values.length - modYears}
                   />
                 </Col>
               </Row>

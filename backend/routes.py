@@ -13,7 +13,8 @@ from models import (
     country_vals_schema,
     User,
     user_schema,
-    users_schema
+    users_schema,
+    UserType
 )
 from middleware import isNotAuth, isAuth
 import bcrypt
@@ -27,7 +28,7 @@ def get_countries():
     return jsonify({'status': 200, 'countries': jsonify(result).json})
 
 @app.route('/country/<iso_alpha_3_code>', methods=['GET'])
-def get_country(iso_alpha_3_code: str):
+def get_country(iso_alpha_3_code):
     country = Country.query.filter_by(iso_alpha_3_code=iso_alpha_3_code.upper()).one()
     
     return jsonify({'status': 200, 'country': country_schema.jsonify(country).json}) 
@@ -40,14 +41,14 @@ def get_indicators():
     return jsonify(result), 200
 
 @app.route('/indicator/<short_name>', methods=['GET'])
-def get_indicator(short_name: str):
+def get_indicator(short_name):
     indicator = EconomicIndicator.query.filter_by(short_name=short_name).one()
 
     return eco_indicator_schema.jsonify(indicator), 200
 
 @app.route('/value/<iso_alpha_3_code>', methods=['GET'])
 @isAuth()
-def get_values(iso_alpha_3_code: str):
+def get_values(iso_alpha_3_code):
     id = Country.query.filter_by(iso_alpha_3_code=iso_alpha_3_code).one().id
     values = CountryIndicatorValue.query.filter_by(country_id=id).all()
     result = country_vals_schema.dump(values)
@@ -71,8 +72,8 @@ def add_value():
 
 @app.route('/value/update/<id>', methods=['PUT'])
 @isAuth()
-def update_value(id: int):
-    entry = CountryIndicatorValue.query.get(id)
+def update_value(id):
+    entry = CountryIndicatorValue.query.get(int(id))
 
     entry.country_id = request.json.get('country_id', None)
     entry.indicator_id = request.json.get('indicator_id', None)
@@ -85,8 +86,8 @@ def update_value(id: int):
 
 @app.route('/value/<id>', methods=['DELETE'])
 @isAuth()
-def delete_value(id: int):
-    entry = CountryIndicatorValue.query.get(id)
+def delete_value(id):
+    entry = CountryIndicatorValue.query.get(int(id))
     db.session.delete(entry)
     db.session.commit()
 
@@ -131,8 +132,6 @@ def create_user():
         username=request.json.get('username', None),
         password=bcrypt.hashpw(request.json.get('password', None).encode('utf-8'),
             bcrypt.gensalt(12)),
-        accepted=False,
-        type=request.json.get('type', None)
     )
 
     db.session.add(user)
@@ -155,7 +154,7 @@ def get_user():
 
 @app.route('/users/<accepted>', methods=['GET'])
 @isAuth()
-def get_users(accepted=0):
+def get_users(accepted):
     users = []
     if int(accepted) == 0:
         users = User.query.filter(User.accepted == False and User.id != request.uid).all()
@@ -163,3 +162,24 @@ def get_users(accepted=0):
         users = User.query.filter(User.accepted == True).all()
     users = users_schema.dump(users)
     return jsonify({'status': 200, 'users': jsonify(users).json})
+
+@app.route('/user/accept/<uid>', methods=['POST'])
+@isAuth()
+def accept_user(uid):
+    user = User.query.get(int(uid))
+    user.accepted = True
+
+    db.session.commit()
+    return jsonify({'status': 200})
+        
+@app.route('/user/promote/<uid>/<promote>', methods=['POST'])
+def promote_user(uid, promote):
+    user = User.query.get(int(uid))
+    types = list(UserType)
+    if int(promote) == 1:
+        user.type = types[types.index(user.type) - 1].value
+    else:
+        user.type = types[types.index(user.type) + 1].value
+
+    db.session.commit()
+    return jsonify({'status': 200, 'type': user.type})

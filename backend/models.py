@@ -85,12 +85,12 @@ class User(db.Model):
     type = db.Column(db.Enum(UserType))
     createdAt = db.Column(db.DateTime(), nullable=False)
 
-    def __init__(self, username, email, password, accepted, type):
+    def __init__(self, username, email, password ):
         self.email = email
         self.username = username
         self.password = password
-        self.accepted = accepted
-        self.type = type
+        self.accepted = False
+        self.type = UserType.MEMBER
         self.createdAt = datetime.now()
 
 class UserSchema(ma.Schema):

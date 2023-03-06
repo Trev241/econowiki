@@ -71,7 +71,7 @@ export default function CountryInfo({ country, info, indicators }) {
               </option>
             ))}
           </Form.Select>
-          <span style={{ color: "rgb(150, 150, 150)" }}>
+          <span style={{ color: "rgb(150, 150, 150)", fontSize: "0.8rem" }}>
             {otherCountries.length}&nbsp;/&nbsp;10
           </span>
         </div>
