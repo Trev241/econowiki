@@ -16,7 +16,9 @@ from models import (
     users_schema,
     UserType
 )
+from predictions.forecaster import Forecaster
 from middleware import isNotAuth, isAuth
+
 import bcrypt
 import re
 
@@ -183,3 +185,13 @@ def promote_user(uid, promote):
 
     db.session.commit()
     return jsonify({'status': 200, 'type': user.type})
+
+@app.route('/predictions/<iso_alpha_3_code>/<indicator_short_name>')
+def fetch_predictions(iso_alpha_3_code, indicator_short_name):
+    country_id = Country.query.filter_by(iso_alpha_3_code=iso_alpha_3_code).one().id
+    indicator_id = EconomicIndicator.query.filter_by(short_name=indicator_short_name).one().id
+
+    forecaster = Forecaster()
+    result = forecaster.predict(country_id, indicator_id)
+
+    return jsonify(result), 200
