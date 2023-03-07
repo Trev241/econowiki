@@ -8,6 +8,9 @@ import { FiEdit2 } from "react-icons/fi";
 import { AuthContext } from "./AuthProvider";
 import { UserType } from "../constants";
 
+/**
+ * @deprecated
+ */
 export default function Chart({
   name,
   description,

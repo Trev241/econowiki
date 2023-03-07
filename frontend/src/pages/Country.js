@@ -1,19 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   ComposableMap,
   Geographies,
   Geography,
-  ZoomableGroup,
+  ZoomableGroup
 } from "react-simple-maps";
+import { FiEdit2 } from "react-icons/fi";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/Button";
 
-import CountryInfo from "../components/CountryInfo";
+import { UserType } from "../constants";
 import Spinner from "../components/Spinner";
-import { cAxios } from "../constants";
+import { CartesianGrid, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Line, Legend } from "recharts";
+import { AuthContext } from "../components/AuthProvider";
 
 const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
@@ -23,54 +26,121 @@ export default function Country() {
   const [center, setCenter] = useState([0, 0]);
   const [centered, setCentered] = useState();
 
-  const [info, setInfo] = useState({});
   const [country, setCountry] = useState({});
   const [indicators, setIndicators] = useState([]);
-  const [indicatorLoading, setIndicatorLoading] = useState(true);
-  const [countryLoading, setCountryLoading] = useState(true);
-  const [infoLoading, setInfoLoading] = useState(true);
+  const [formattedData, setFormattedData] = useState();
+
+  const [isLoading, setLoading] = useState(true);
 
   const geoRef = useRef(null);
   const params = useParams();
+  const navigate = useNavigate()
+  const { user } = useContext(AuthContext)
 
   useEffect(() => {
-    setCountryLoading(true);
-    setIndicatorLoading(true);
-    setInfoLoading(true);
+    setLoading(true);
+    (async () => {
+      try {
+        let response;
+        
+        // Fetch country
+        response = await fetch(`http://localhost:5001/country/${params.id}`, {
+          credentials: "include"
+        });
+        const result = await response.json();
+        const _country = result.country
+        setCountry(_country);
 
-    cAxios
-      .get("/country/" + params.id)
-      .then(({ data }) => {
-        if (data.status === 200) {
-          setCountry(data.country);
+        // Fetch indicators
+        response = await fetch(`http://localhost:5001/indicator`, {
+          credentials: "include"
+        });
+        const _indicators = await response.json();
+        setIndicators(_indicators);
+
+        // Fetch values 
+        response = await fetch(`http://localhost:5001/value/${params.id}`, {
+          credentials: "include"
+        });
+        const _values = await response.json();
+
+        // Fetch predictions
+        let _predictions = [];
+        let minYear = _values[0]?.year;
+        let maxYear = _values[0]?.year;
+        // It is better to use a regular for-of loop here instead of a forEach callback
+        // await behaviour is more conistent here compared to passing an async callback
+        for (const indicator of _indicators) {
+          for (const entry of _values) {
+            if (entry.indicator_id === indicator.id) {
+              maxYear = Math.max(maxYear, entry.year);
+              minYear = Math.min(minYear, entry.year);
+            }
+          }
+
+          let years = [];
+          for (let year = minYear; year <= maxYear + 3; year++)
+            years.push(year);
+
+          const response = await fetch(`http://localhost:5001/prediction`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              iso_alpha_3_code: _country.iso_alpha_3_code,
+              indicator_short_name: indicator.short_name,
+              years: years
+            })
+          });
+
+          const result = await response.json();
+          _predictions.push(result);
         }
-      })
-      .finally(() => {
-        setCountryLoading(false);
-      });
-    cAxios
-      .get("/indicator")
-      .then(({ data }) => {
-        setIndicators(data);
-      })
-      .catch((err) => {
-        console.error(err);
-      })
-      .finally(() => {
-        setIndicatorLoading(false);
-      });
 
-    cAxios
-      .get("/value/" + params.id)
-      .then(({ data }) => {
-        setInfo(data);
-      })
-      .catch((err) => {
+        // Grouping values according to economic indicator
+        const data = [...Array(_indicators.length)].map(() => ({}));
+        for (const entry of _values) {
+          data[entry.indicator_id - 1][entry.year] = {
+            ...entry,
+            prediction: null
+          }
+        }
+  
+        // Including predictions
+        _predictions.forEach((predictionSet, idx) => {
+          Object.keys(predictionSet).forEach(year => {
+            const future = !data[idx][year] && year >= maxYear
+            // Create data point
+            if (future) 
+              data[idx][year] = {
+                year: year,
+                value: null,
+              }
+
+            // Set projected values for current and near future
+            if (data[idx][year]?.value || future)
+              data[idx][year].prediction = predictionSet[year]
+          });
+        });
+
+        // Reconstruct as list to be consumed by recharts
+        const finalData = data.map(datasubset => (
+          Object.keys(datasubset).map(year => ({
+            year: year,
+            value: datasubset[year].value,
+            prediction: datasubset[year].prediction
+          }))  
+        ))
+
+        setFormattedData(finalData)
+      } catch (err) {
         console.error(err);
-      })
-      .finally(() => {
-        setInfoLoading(false);
-      });
+      }
+
+      setLoading(false);
+    })();
   }, [params]);
 
   useEffect(() => {
@@ -102,62 +172,84 @@ export default function Country() {
   });
 
   return (
-    <>
-      <Container>
-        {/* <div className="p-4">
-          <Link
-            to={"/"}
-            className="px-3 py-2 border-0 text-dark text-decoration-none bg-light"
+    (isLoading) ? (
+      <Spinner />
+    ) : (
+      <>
+        <Container>
+          <Row
+            className="mt-5 mb-5 text-center"
+            style={{
+              visibility: centered ? "visible" : "hidden",
+            }}
           >
-            {"<"}
-          </Link>
-        </div> */}
+            <Col className="d-flex align-items-center">
+              <Container fluid>
+                <h1 className="display-1">{country.name}</h1>
+                <p className="lead">
+                  ({country.iso_alpha_2_code}, {country.iso_alpha_3_code},{" "}
+                  {country.un_code})
+                </p>
+              </Container>
+            </Col>
+            <Col className="d-flex align-items-center" xs={4}>
+              <Container fluid>
+                <ComposableMap
+                  className="border border-dark rounded"
+                  projection="geoMercator"
+                >
+                  <ZoomableGroup center={center} zoom={zoom}>
+                    <Geographies geography={WORLD_GEO_URL}>
+                      {({ geographies, projection, path }) => {
+                        const geo = geographies.find(
+                          (geo) => geo.id === params.id
+                        );
+                        geoRef.current = { geo, projection, path };
+                        return <Geography key={geo.rsmKey} geography={geo} />;
+                      }}
+                    </Geographies>
+                  </ZoomableGroup>
+                </ComposableMap>
+              </Container>
+            </Col>
+          </Row>
+        </Container>
+  
+        {/* <CountryInfo country={country} info={info} indicators={indicators} predictions={predictions} modData={formattedData} /> */}
 
-        <Row
-          className="mt-5 mb-5 text-center"
-          style={{
-            visibility: centered && !countryLoading ? "visible" : "hidden",
-          }}
-        >
-          <Col className="d-flex align-items-center">
-            <Container fluid>
-              <h1 className="display-1">{country.name}</h1>
-              <p className="lead">
-                ({country.iso_alpha_2_code}, {country.iso_alpha_3_code},{" "}
-                {country.un_code})
-              </p>
-            </Container>
-          </Col>
-          <Col className="d-flex align-items-center" xs={4}>
-            <Container fluid>
-              <ComposableMap
-                className="border border-dark rounded"
-                projection="geoMercator"
-              >
-                <ZoomableGroup center={center} zoom={zoom}>
-                  <Geographies geography={WORLD_GEO_URL}>
-                    {({ geographies, projection, path }) => {
-                      const geo = geographies.find(
-                        (geo) => geo.id === params.id
-                      );
-                      geoRef.current = { geo, projection, path };
-                      return <Geography key={geo.rsmKey} geography={geo} />;
-                    }}
-                  </Geographies>
-                </ZoomableGroup>
-              </ComposableMap>
-            </Container>
-          </Col>
-        </Row>
-      </Container>
-
-      {/* <hr className="my-5" /> */}
-
-      {indicatorLoading || infoLoading ? (
-        <Spinner />
-      ) : (
-        <CountryInfo country={country} info={info} indicators={indicators} />
-      )}
-    </>
+        <Container className="my-5">
+          {formattedData.map((dataset, idx) => 
+            <Row key={idx} className="mb-5">
+              <div className="d-flex">
+                <h1 className="display-6">{indicators[idx].name}</h1>
+                {user.type !== UserType.MEMBER && (
+                  <Button
+                    variant="outline-dark"
+                    className="ms-auto my-2"
+                    onClick={() => navigate(`/edit/?country=${country.iso_alpha_3_code}&indicator=${idx + 1}` || "/edit")}
+                  >
+                    <FiEdit2 />
+                  </Button>
+                )}
+              </div>
+              <p className="lead mb-4">{indicators[idx].description}</p>
+              
+              {/* TODO: YAxis datakey should be set to the highest number (either value or prediction) to avoid lines from going outside the charts */}
+              <ResponsiveContainer aspect={3 / 1}>
+                <LineChart data={dataset}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey={"year"} />
+                  <YAxis dataKey={"value"} />
+                  <Legend verticalAlign="top" height={36} />
+                  <Line name="Actual values" type={"monotone"} dataKey="value" stroke="#222222" />
+                  <Line name="Projected values" type={"monotone"} dataKey="prediction" stroke="#0000FF" />
+                  <Tooltip />
+                </LineChart>
+              </ResponsiveContainer>
+            </Row>
+          )}
+        </Container>
+      </>
+    )
   );
 }

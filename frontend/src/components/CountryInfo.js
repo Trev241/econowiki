@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -28,17 +28,32 @@ import { mergeData } from "../utils";
 import { AuthContext } from "./AuthProvider";
 import Chart from "./Chart";
 
-export default function CountryInfo({ country, info, indicators }) {
+/**
+ * @deprecated
+ */
+export default function CountryInfo({ country, info, indicators, predictions, modData }) {
   const [otherCountries, setOtherCountries] = useState([]);
   const { countries } = useContext(AuthContext);
 
-  const modData = useMemo(() => {
-    const result = [...Array(9)].map(() => []);
-    for (const value of info) {
-      result[value.indicator_id - 1].push(value);
-    }
-    return result;
-  }, [info]);
+  // const modData = useMemo(() => {
+  //   const result = [...Array(9)].map(() => []);
+    
+  //   // Include data
+  //   for (const entry of info) 
+  //     result[entry.indicator_id - 1].push(entry);
+    
+  //   // Include predictions
+  //   predictions.forEach((predictionSet, idx) => {
+  //     Object.keys(predictionSet).forEach(year => {
+  //       result[idx].push({ 
+  //         year: year,
+  //         prediction: predictionSet[year]
+  //       })
+  //     })
+  //   })
+
+  //   return result;
+  // }, [info, predictions]);
 
   const handleSelectChange = useCallback(async (e) => {
     setOtherCountries((prev) => [...prev, e.target.value]);
@@ -111,6 +126,7 @@ export default function CountryInfo({ country, info, indicators }) {
               <XAxis dataKey={"year"} />
               <YAxis dataKey={"value"} />
               <Line type={"monotone"} dataKey="value" stroke="#222222" />
+              <Line type={"monotone"} dataKey="prediction" stroke="#0000FF" />
               <Tooltip />
             </LineChart>
           }
@@ -133,6 +149,12 @@ export default function CountryInfo({ country, info, indicators }) {
                 dataKey="value"
                 stroke="#222222"
                 fill="#FFA500"
+              />
+              <Area
+                type="monotone"
+                dataKey="prediction"
+                stroke="#0000FF"
+                fill="#CC6300"
               />
               <Tooltip />
             </AreaChart>
@@ -193,7 +215,8 @@ export default function CountryInfo({ country, info, indicators }) {
               <YAxis dataKey="value" />
               <Tooltip />
               <Bar dataKey="value" fill="#222222" />
-            </BarChart>
+              <Bar dataKey="prediction" fill="#0000FF" />
+            </BarChart> 
           }
         />
       </Row>
@@ -211,6 +234,7 @@ export default function CountryInfo({ country, info, indicators }) {
               <YAxis dataKey="value" />
               <Tooltip />
               <Bar dataKey="value" fill="#FFA500" />
+              <Bar dataKey="prediction" fill="#0000FF" />
             </BarChart>
           }
         />
@@ -229,6 +253,7 @@ export default function CountryInfo({ country, info, indicators }) {
               <YAxis dataKey="value" />
               <Tooltip />
               <Bar dataKey="value" fill="#222222" />
+              <Bar dataKey="prediction" fill="#0000FF" />
             </BarChart>
           }
         />
