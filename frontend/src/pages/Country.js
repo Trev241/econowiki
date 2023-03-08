@@ -244,7 +244,7 @@ export default function Country() {
                   className="ms-auto my-2"
                   onClick={() =>
                     navigate(
-                      `/edit/?country=${country.iso_alpha_3_code}&indicator=${
+                      `/values/?country=${country.iso_alpha_3_code}&indicator=${
                         idx + 1
                       }` || "/edit"
                     )

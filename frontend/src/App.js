@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import "./App.css";
 import Signup from "./pages/Signup";
+import Indicator from "./pages/Indicator";
 
 function App() {
   const { loading, setLoading, setUser } = useContext(AuthContext);
@@ -41,8 +42,9 @@ function App() {
         <Route element={<Public component={Login} />} path="/login" />
         <Route element={<Public component={Signup} />} path="/signup" />
         <Route element={<Private component={Country} />} path="/:id" />
-        <Route element={<Private component={CountryEdit} />} path="/edit" />
+        <Route element={<Private component={CountryEdit} />} path="/values" />
         <Route element={<Private component={Dashboard} />} path="/dashboard" />
+        <Route element={<Private component={Indicator} />} path="/indicators" />
       </Routes>
     </BrowserRouter>
   );
