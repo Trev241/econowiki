@@ -384,7 +384,7 @@ export default function CountryEdit() {
 
           {values.length > 0 ? (
             values.map((entry, idx) => (
-              <Row className={`mb-3 ${getBorderStyle(entry)}`}>
+              <Row className={`mb-3 ${getBorderStyle(entry)}`} key={entry.id}>
                 <Col xs={1}>
                   <div
                     className="d-flex align-items-center"

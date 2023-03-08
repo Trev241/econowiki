@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import "./App.css";
+import Signup from "./pages/Signup";
 
 function App() {
   const { loading, setLoading, setUser } = useContext(AuthContext);
@@ -38,6 +39,7 @@ function App() {
       <Routes>
         <Route index element={<Home />} />
         <Route element={<Public component={Login} />} path="/login" />
+        <Route element={<Public component={Signup} />} path="/signup" />
         <Route element={<Private component={Country} />} path="/:id" />
         <Route element={<Private component={CountryEdit} />} path="/edit" />
         <Route element={<Private component={Dashboard} />} path="/dashboard" />

@@ -52,11 +52,19 @@ function Item({
         </Col>
         {!isPending && (
           <>
-            <Col md className="d-flex align-items-center" style={{ fontSize: ".8rem" }}>
+            <Col
+              md
+              className="d-flex align-items-center"
+              style={{ fontSize: ".8rem" }}
+            >
               {user.email}
             </Col>
-            
-            <Col md className="d-flex align-items-center" style={{ fontSize: ".8rem" }} >
+
+            <Col
+              md
+              className="d-flex align-items-center"
+              style={{ fontSize: ".8rem" }}
+            >
               {user.type === UserType.ADMINISTRATOR ? (
                 <GrUserAdmin />
               ) : user.type === UserType.MODERATOR ? (
@@ -68,11 +76,15 @@ function Item({
             </Col>
           </>
         )}
-        <Col md className="d-flex align-items-center" style={{ fontSize: ".8rem" }} >
+        <Col
+          md
+          className="d-flex align-items-center"
+          style={{ fontSize: ".8rem" }}
+        >
           {new Date(user.createdAt).toLocaleString()}
         </Col>
 
-        <Col md className="d-flex align-items-center">
+        <Col md className="d-flex align-items-center justify-content-end">
           {isPending ? (
             <>
               <Button
@@ -212,10 +224,7 @@ export default function Dashboard() {
       </Row>
       <Row>
         <Col xl={8}>
-          <Accordion
-            defaultActiveKey="0"
-            className="mb-4"
-          >
+          <Accordion defaultActiveKey="0" className="mb-4">
             <Accordion.Item eventKey="0">
               <Accordion.Header>
                 <MdPendingActions /> &nbsp;Pending
@@ -234,10 +243,7 @@ export default function Dashboard() {
           </Accordion>
         </Col>
         <Col sm>
-          <Accordion
-            defaultActiveKey={"0"}
-            className="mb-4"
-          >
+          <Accordion defaultActiveKey={"0"} className="mb-4">
             <Accordion.Item eventKey="0">
               <Accordion.Header>
                 <BiBookAlt /> &nbsp;Logs

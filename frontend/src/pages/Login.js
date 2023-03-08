@@ -41,7 +41,7 @@ export default function Login() {
   );
 
   return (
-    <div className="d-flex align-items-center" style={{ minHeight: "100vh" }}>
+    <div className="d-flex align-items-center m-4">
       <Container>
         <Row className="justify-content-center">
           <Col lg={6}>
@@ -69,7 +69,7 @@ export default function Login() {
                   type="text"
                   autoFocus
                   name="nameOrEmail"
-                  value={form.username}
+                  value={form.nameOrEmail}
                   onChange={(e) => updateForm(e)}
                 />
               </Form.Group>

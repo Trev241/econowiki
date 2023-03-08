@@ -73,13 +73,23 @@ export default function NavigationBar() {
               ))}
             </Form.Select>
             {!user ? (
-              <Button
-                variant="outline-secondary"
-                onClick={() => navigate("/login")}
-                size="sm"
-              >
-                Login
-              </Button>
+              <>
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => navigate("/login")}
+                  size="sm"
+                >
+                  Login
+                </Button>
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => navigate("/signup")}
+                  size="sm"
+                  className="m-2"
+                >
+                  SignUp
+                </Button>
+              </>
             ) : (
               <>
                 <img
@@ -119,17 +129,6 @@ export default function NavigationBar() {
                 </div>
               </>
             )}
-          </Nav>
-          <Nav>
-            {/* <Form className="d-flex">
-              <Form.Control
-                type="search"
-                placeholder="Search"
-                className="me-2"
-                aria-label="Search"
-              />
-              <Button variant="outline-light">Search</Button>
-            </Form> */}
           </Nav>
         </Navbar.Collapse>
       </Container>

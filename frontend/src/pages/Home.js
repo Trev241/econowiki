@@ -28,7 +28,7 @@ export default function Home() {
               textAlign: "center",
               fontWeight: "bold",
               WebkitTextStroke: "2px black",
-              WebkitTextFillColor: "black",
+              WebkitTextFillColor: "white",
               fontSize: "3rem",
               textTransform: "uppercase",
               padding: 0,

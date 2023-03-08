@@ -4,7 +4,7 @@ import {
   ComposableMap,
   Geographies,
   Geography,
-  ZoomableGroup
+  ZoomableGroup,
 } from "react-simple-maps";
 import { FiEdit2 } from "react-icons/fi";
 
@@ -15,7 +15,16 @@ import Button from "react-bootstrap/Button";
 
 import { UserType } from "../constants";
 import Spinner from "../components/Spinner";
-import { CartesianGrid, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Line, Legend } from "recharts";
+import {
+  CartesianGrid,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  Line,
+  Legend,
+} from "recharts";
 import { AuthContext } from "../components/AuthProvider";
 
 const WORLD_GEO_URL =
@@ -34,33 +43,33 @@ export default function Country() {
 
   const geoRef = useRef(null);
   const params = useParams();
-  const navigate = useNavigate()
-  const { user } = useContext(AuthContext)
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     setLoading(true);
     (async () => {
       try {
         let response;
-        
+
         // Fetch country
         response = await fetch(`http://localhost:5001/country/${params.id}`, {
-          credentials: "include"
+          credentials: "include",
         });
         const result = await response.json();
-        const _country = result.country
+        const _country = result.country;
         setCountry(_country);
 
         // Fetch indicators
         response = await fetch(`http://localhost:5001/indicator`, {
-          credentials: "include"
+          credentials: "include",
         });
         const _indicators = await response.json();
         setIndicators(_indicators);
 
-        // Fetch values 
+        // Fetch values
         response = await fetch(`http://localhost:5001/value/${params.id}`, {
-          credentials: "include"
+          credentials: "include",
         });
         const _values = await response.json();
 
@@ -86,13 +95,13 @@ export default function Country() {
             method: "POST",
             credentials: "include",
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               iso_alpha_3_code: _country.iso_alpha_3_code,
               indicator_short_name: indicator.short_name,
-              years: years
-            })
+              years: years,
+            }),
           });
 
           const result = await response.json();
@@ -104,37 +113,37 @@ export default function Country() {
         for (const entry of _values) {
           data[entry.indicator_id - 1][entry.year] = {
             ...entry,
-            prediction: null
-          }
+            prediction: null,
+          };
         }
-  
+
         // Including predictions
         _predictions.forEach((predictionSet, idx) => {
-          Object.keys(predictionSet).forEach(year => {
-            const future = !data[idx][year] && year >= maxYear
+          Object.keys(predictionSet).forEach((year) => {
+            const future = !data[idx][year] && year >= maxYear;
             // Create data point
-            if (future) 
+            if (future)
               data[idx][year] = {
                 year: year,
                 value: null,
-              }
+              };
 
             // Set projected values for current and near future
             if (data[idx][year]?.value || future)
-              data[idx][year].prediction = predictionSet[year]
+              data[idx][year].prediction = predictionSet[year];
           });
         });
 
         // Reconstruct as list to be consumed by recharts
-        const finalData = data.map(datasubset => (
-          Object.keys(datasubset).map(year => ({
+        const finalData = data.map((datasubset) =>
+          Object.keys(datasubset).map((year) => ({
             year: year,
             value: datasubset[year].value,
-            prediction: datasubset[year].prediction
-          }))  
-        ))
+            prediction: datasubset[year].prediction,
+          }))
+        );
 
-        setFormattedData(finalData)
+        setFormattedData(finalData);
       } catch (err) {
         console.error(err);
       }
@@ -171,85 +180,107 @@ export default function Country() {
     }
   });
 
-  return (
-    (isLoading) ? (
-      <Spinner />
-    ) : (
-      <>
-        <Container>
-          <Row
-            className="mt-5 mb-5 text-center"
-            style={{
-              visibility: centered ? "visible" : "hidden",
-            }}
-          >
-            <Col className="d-flex align-items-center">
-              <Container fluid>
-                <h1 className="display-1">{country.name}</h1>
-                <p className="lead">
-                  ({country.iso_alpha_2_code}, {country.iso_alpha_3_code},{" "}
-                  {country.un_code})
-                </p>
-              </Container>
-            </Col>
-            <Col className="d-flex align-items-center" xs={4}>
-              <Container fluid>
-                <ComposableMap
-                  className="border border-dark rounded"
-                  projection="geoMercator"
-                >
-                  <ZoomableGroup center={center} zoom={zoom}>
-                    <Geographies geography={WORLD_GEO_URL}>
-                      {({ geographies, projection, path }) => {
-                        const geo = geographies.find(
-                          (geo) => geo.id === params.id
-                        );
-                        geoRef.current = { geo, projection, path };
-                        return <Geography key={geo.rsmKey} geography={geo} />;
-                      }}
-                    </Geographies>
-                  </ZoomableGroup>
-                </ComposableMap>
-              </Container>
-            </Col>
-          </Row>
-        </Container>
-  
-        {/* <CountryInfo country={country} info={info} indicators={indicators} predictions={predictions} modData={formattedData} /> */}
+  return isLoading ? (
+    <Spinner />
+  ) : (
+    <>
+      <Container>
+        <Row
+          className="text-center d-flex align-items-center justify-content-center"
+          style={{
+            margin: "5rem",
+          }}
+        >
+          <Col xs={4}>
+            <Container fluid>
+              <h1
+                className="display-6"
+                style={{
+                  textTransform: "uppercase",
+                  fontWeight: "bold",
+                }}
+              >
+                {country.name}
+              </h1>
+              <p className="lead">
+                ({country.iso_alpha_2_code}, {country.iso_alpha_3_code},{" "}
+                {country.un_code})
+              </p>
+            </Container>
+          </Col>
+          <Col xs={4}>
+            <Container fluid>
+              <ComposableMap
+                className="border border-secondary rounded"
+                projection="geoMercator"
+              >
+                <ZoomableGroup center={center} zoom={zoom}>
+                  <Geographies geography={WORLD_GEO_URL}>
+                    {({ geographies, projection, path }) => {
+                      const geo = geographies.find(
+                        (geo) => geo.id === params.id
+                      );
+                      geoRef.current = { geo, projection, path };
+                      return <Geography key={geo.rsmKey} geography={geo} />;
+                    }}
+                  </Geographies>
+                </ZoomableGroup>
+              </ComposableMap>
+            </Container>
+          </Col>
+        </Row>
+      </Container>
 
-        <Container className="my-5">
-          {formattedData.map((dataset, idx) => 
-            <Row key={idx} className="mb-5">
-              <div className="d-flex">
-                <h1 className="display-6">{indicators[idx].name}</h1>
-                {user.type !== UserType.MEMBER && (
-                  <Button
-                    variant="outline-dark"
-                    className="ms-auto my-2"
-                    onClick={() => navigate(`/edit/?country=${country.iso_alpha_3_code}&indicator=${idx + 1}` || "/edit")}
-                  >
-                    <FiEdit2 />
-                  </Button>
-                )}
-              </div>
-              <p className="lead mb-4">{indicators[idx].description}</p>
-              
-              {/* TODO: YAxis datakey should be set to the highest number (either value or prediction) to avoid lines from going outside the charts */}
-              <ResponsiveContainer aspect={3 / 1}>
-                <LineChart data={dataset}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey={"year"} />
-                  <YAxis dataKey={"value"} />
-                  <Legend verticalAlign="top" height={36} />
-                  <Line name="Actual values" type={"monotone"} dataKey="value" stroke="#222222" />
-                  <Line name="Projected values" type={"monotone"} dataKey="prediction" stroke="#0000FF" />
-                  <Tooltip />
-                </LineChart>
-              </ResponsiveContainer>
-            </Row>
-          )}
-        </Container>
-      </>
-    )
+      {/* <CountryInfo country={country} info={info} indicators={indicators} predictions={predictions} modData={formattedData} /> */}
+
+      <Container className="my-5">
+        {formattedData.map((dataset, idx) => (
+          <Row key={idx} className="mb-5">
+            <div className="d-flex">
+              <h1 className="display-6">{indicators[idx].name}</h1>
+              {user.type !== UserType.MEMBER && (
+                <Button
+                  variant="outline-dark"
+                  className="ms-auto my-2"
+                  onClick={() =>
+                    navigate(
+                      `/edit/?country=${country.iso_alpha_3_code}&indicator=${
+                        idx + 1
+                      }` || "/edit"
+                    )
+                  }
+                >
+                  <FiEdit2 />
+                </Button>
+              )}
+            </div>
+            <p className="lead mb-4">{indicators[idx].description}</p>
+
+            {/* TODO: YAxis datakey should be set to the highest number (either value or prediction) to avoid lines from going outside the charts */}
+            <ResponsiveContainer aspect={3 / 1}>
+              <LineChart data={dataset}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey={"year"} />
+                <YAxis dataKey={"value"} />
+                <Legend verticalAlign="top" height={36} />
+                <Line
+                  name="Actual"
+                  type={"monotone"}
+                  dataKey="value"
+                  stroke="#222222"
+                />
+                <Line
+                  name="Projected"
+                  type={"monotone"}
+                  dataKey="prediction"
+                  stroke="#0000FF"
+                />
+                <Tooltip />
+              </LineChart>
+            </ResponsiveContainer>
+          </Row>
+        ))}
+      </Container>
+    </>
   );
 }

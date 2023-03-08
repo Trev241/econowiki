@@ -14,18 +14,12 @@ class AuthService {
     );
   }
 
-  register(email, username, password) {
-    return cAxios.post(
-      `/auth/signup`,
-      {
-        email,
-        username,
-        password,
-      },
-      {
-        withCredentials: true,
-      }
-    );
+  signup(username, email, password) {
+    return cAxios.post(`/auth/signup`, {
+      username,
+      email,
+      password,
+    });
   }
 }
 
