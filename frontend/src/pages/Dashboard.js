@@ -15,6 +15,7 @@ import {
 import { MdPendingActions, MdOutlineNoteAdd } from "react-icons/md";
 import { RiAdminLine } from "react-icons/ri";
 import { TiTick } from "react-icons/ti";
+import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
 import Spinner from "../components/Spinner";
@@ -23,7 +24,7 @@ import { cAxios, LogOps, UserType } from "../constants";
 function Item({
   user,
   isPending,
-  acceptUser = undefined,
+  confirmUser = undefined,
   promoteUser = undefined,
 }) {
   const { user: authUser } = useContext(AuthContext);
@@ -91,9 +92,16 @@ function Item({
                 variant="outline-success"
                 size="sm"
                 className="mx-2"
-                onClick={() => acceptUser(user)}
+                onClick={() => confirmUser(user, 1)}
               >
                 <TiTick />
+              </Button>
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => confirmUser(user, 0)}
+              >
+                <RxCross1 />
               </Button>
             </>
           ) : (
@@ -189,11 +197,13 @@ export default function Dashboard() {
     }
   }, [user, navigate]);
 
-  const acceptUser = useCallback((u) => {
-    cAxios.post(`/user/accept/${u.id}`).then((res) => {
+  const confirmUser = useCallback((u, accept) => {
+    cAxios.post(`/user/confirm`, { uid: u.id, accept }).then((res) => {
       if (res.data.status === 200) {
         setPending((prev) => prev.filter((_u) => _u.id !== u.id));
-        setUsers((prev) => [u, ...prev]);
+        if (accept === 1) {
+          setUsers((prev) => [u, ...prev]);
+        }
       }
     });
   }, []);
@@ -235,7 +245,7 @@ export default function Dashboard() {
                     key={u.id}
                     user={u}
                     isPending={true}
-                    acceptUser={acceptUser}
+                    confirmUser={confirmUser}
                   />
                 ))}
               </Accordion.Body>

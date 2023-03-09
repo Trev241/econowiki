@@ -7,15 +7,23 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
+import FormError from "../components/FormError";
 import Logo from "../components/Logo";
 import authService from "../services/AuthService";
+import Spinner from "react-bootstrap/Spinner";
+import { BiErrorCircle } from "react-icons/bi";
 
 export default function Login() {
-  const [showFailedAlert, setShowFailedAlert] = useState(false);
+  const [serverError, setServerError] = useState("");
   const [form, setForm] = useState({
     nameOrEmail: "",
     password: "",
   });
+  const [errors, setErrors] = useState({
+    nameOrEmail: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const { setUser } = useContext(AuthContext);
@@ -29,13 +37,29 @@ export default function Login() {
     async (e) => {
       e.preventDefault();
 
-      const response = await authService.login(form.nameOrEmail, form.password);
-      if (response.data.status === 200) {
-        setUser(response.data.user);
-        navigate("/");
-        return;
+      const _errors = {};
+      if (form.nameOrEmail.trim().length === 0)
+        _errors.nameOrEmail = "Name/Email must not be empty!";
+      if (form.password.trim().length < 8)
+        _errors.password = "Password length must be >= 8!";
+
+      setErrors(_errors);
+      setServerError("");
+
+      if (JSON.stringify(_errors) === "{}") {
+        setLoading(true);
+        const response = await authService.login(
+          form.nameOrEmail,
+          form.password
+        );
+        setLoading(false);
+        if (response.data.status === 200) {
+          setUser(response.data.user);
+          navigate("/");
+          return;
+        }
+        setServerError(response.data.message);
       }
-      setShowFailedAlert(true);
     },
     [form, navigate, setUser]
   );
@@ -57,9 +81,13 @@ export default function Login() {
                 styles={{ textAlign: "center", marginBottom: "2rem" }}
               />
 
-              {showFailedAlert && (
-                <Alert className="mb-4" variant="danger">
-                  Failed to log in
+              {serverError && (
+                <Alert
+                  className="mb-4"
+                  variant="danger"
+                  style={{ fontSize: "0.8rem" }}
+                >
+                  <BiErrorCircle /> &nbsp;{serverError}
                 </Alert>
               )}
 
@@ -71,7 +99,9 @@ export default function Login() {
                   name="nameOrEmail"
                   value={form.nameOrEmail}
                   onChange={(e) => updateForm(e)}
+                  style={{ border: errors.nameOrEmail && "1px solid red" }}
                 />
+                <FormError message={errors.nameOrEmail} />
               </Form.Group>
 
               <Form.Group className="mb-5">
@@ -81,11 +111,17 @@ export default function Login() {
                   name="password"
                   value={form.password}
                   onChange={(e) => updateForm(e)}
+                  style={{ border: errors.password && "1px solid red" }}
                 />
+                <FormError message={errors.password} />
               </Form.Group>
 
               <Button className="w-100" type="submit">
-                Login
+                {loading ? (
+                  <Spinner animation="border" variant="light" size="sm" />
+                ) : (
+                  "Login"
+                )}
               </Button>
             </Form>
           </Col>

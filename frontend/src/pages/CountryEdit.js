@@ -1,28 +1,16 @@
-// import HTMLParser from "html-react-parser";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-// import Alert from "react-bootstrap/Alert";
-// import Button from "react-bootstrap/Button";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
-// import { AiFillDelete, AiFillSave } from "react-icons/ai";
-// import { BsFilter } from "react-icons/bs";
-import { MdCancel, MdError, MdOutlineFeaturedPlayList } from "react-icons/md";
-// import { FaCheck } from "react-icons/fa";
-// import { IoIosAddCircleOutline } from "react-icons/io";
+import { MdOutlineFeaturedPlayList } from "react-icons/md";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import Spinner from "../components/Spinner";
-import { cAxios, modYears, UserType } from "../constants";
-// import { TbMoodEmpty } from "react-icons/tb";
 import { AuthContext } from "../components/AuthProvider";
+import Spinner from "../components/Spinner";
+import { cAxios, UserType } from "../constants";
 import EditableList, { flags } from "./EditableList";
+import { BiErrorCircle } from "react-icons/bi";
+import Alert from "react-bootstrap/Alert";
 
 export default function CountryEdit() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,7 +21,6 @@ export default function CountryEdit() {
   const [indicators, setIndicators] = useState();
   const [country, setCountry] = useState();
 
-  const [showUnsaved, setShowUnsaved] = useState(false);
   const [alert, setAlert] = useState({
     message: "",
     status: "",
@@ -58,14 +45,13 @@ export default function CountryEdit() {
         // Save indicator data and map them to their ID
         response = await cAxios.get(`/indicator`);
         const _indicators = {};
-        response.data.forEach(indicator => {
-          _indicators[indicator.id] = indicator
-        })
+        response.data.forEach((indicator) => {
+          _indicators[indicator.id] = indicator;
+        });
         setIndicators(_indicators);
 
         response = await cAxios.get(`/country`);
-        if (response.data.status === 200)
-          setCountries(response.data.countries);
+        if (response.data.status === 200) setCountries(response.data.countries);
       } catch (error) {
         showError(error);
       }
@@ -85,32 +71,31 @@ export default function CountryEdit() {
 
         // Fetch values of country
         response = await cAxios.get(`/value/${searchParams.get("country")}`);
-        
+
         // Group data into years
         const dataByYears = {};
-        response.data.forEach(entry => {
-          if (!dataByYears[entry.year])
-            dataByYears[entry.year] = {}
-          
+        response.data.forEach((entry) => {
+          if (!dataByYears[entry.year]) dataByYears[entry.year] = {};
+
           // TODO: Change dependency behaviour - indicators is sometimes undefined
           dataByYears[entry.year][indicators[entry.indicator_id].short_name] = {
             value: entry.value,
-            id: entry.id
+            id: entry.id,
           };
-        })
+        });
 
         // Convert into list for future components to consume
-        const _formattedData = Object.keys(dataByYears).map(year => {
+        const _formattedData = Object.keys(dataByYears).map((year) => {
           const entry = { year: year };
-          Object.keys(dataByYears[year]).forEach(indicator_short_name => {
-            entry[indicator_short_name] = dataByYears[year][indicator_short_name].value;
+          Object.keys(dataByYears[year]).forEach((indicator_short_name) => {
+            entry[indicator_short_name] =
+              dataByYears[year][indicator_short_name].value;
           });
           return entry;
-        })
+        });
 
         setFormattedData(_formattedData);
         setValues(dataByYears);
-        setShowUnsaved(false);
       } catch (error) {
         showError(error);
       }
@@ -135,12 +120,13 @@ export default function CountryEdit() {
     // First, save editions/additions to database
     for (let idx = 0; idx < entries.length; idx++) {
       // Ignore entries that have not been edited and created
-      if (!entries[idx].edited && !entries[idx].added)
-        continue;
-      
+      if (!entries[idx].edited && !entries[idx].added) continue;
+
       const ignoreProps = new Set(flags).add("year");
-      const props = Object.keys(entries[idx]).filter(key => !ignoreProps.has(key));
-      
+      const props = Object.keys(entries[idx]).filter(
+        (key) => !ignoreProps.has(key)
+      );
+
       for (const prop of props) {
         let api_endpoint = "http://localhost:5001/value/";
         let method;
@@ -159,10 +145,9 @@ export default function CountryEdit() {
             method = "DELETE";
           } else if (old.value !== entries[idx][prop]) {
             // Value was edited
-            api_endpoint += `update/${old.id}`
+            api_endpoint += `update/${old.id}`;
             method = "PUT";
-          } else
-            continue;
+          } else continue;
 
           await fetch(api_endpoint, {
             method: method,
@@ -170,10 +155,12 @@ export default function CountryEdit() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               country_id: country.id,
-              indicator_id: Object.values(indicators).find(indicator => indicator.short_name === prop)?.id,
+              indicator_id: Object.values(indicators).find(
+                (indicator) => indicator.short_name === prop
+              )?.id,
               year: entries[idx].year,
-              value: entries[idx][prop]
-            })
+              value: entries[idx][prop],
+            }),
           });
         } catch (err) {
           console.error(err);
@@ -187,7 +174,7 @@ export default function CountryEdit() {
         try {
           await fetch(`http://localhost:5001/value/${old.id}`, {
             method: "DELETE",
-            credentials: "include"
+            credentials: "include",
           });
         } catch (err) {
           console.error(err);
@@ -196,7 +183,7 @@ export default function CountryEdit() {
     // TODO: Should be possible to edit years as well
 
     window.location.reload();
-  }
+  };
 
   // const isNumeric = useCallback((str) => {
   //   if (typeof str === "number") return true;
@@ -208,52 +195,57 @@ export default function CountryEdit() {
   //     ); // ...and ensure strings of whitespace fail
   // }, []);
 
-  const isModerator = useMemo(() => user.type === UserType.MODERATOR, [user]);
-  
   if (!values || !countries || !indicators || !country) {
     return <Spinner />;
   }
 
   return (
-    <Container fluid className="my-5 px-3">
-      <div className="mb-5">
-        <h1 className="mb-3">
+    <Container fluid className="px-3">
+      {alert.message && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => setAlert({ message: "", status: "" })}
+          className="w-75 mx-auto"
+        >
+          <BiErrorCircle /> &nbsp;{alert.message}
+        </Alert>
+      )}
+      <div className="my-5">
+        <h4 className="mb-3 text-center">
           <MdOutlineFeaturedPlayList className="mb-2" />
           &nbsp;Values
-        </h1>
-        <p className="lead mb-3">Select a country below to view all of its related records.</p>
-      
-        <Form.Group as={Row} className="mb-3" controlId="country">
-          <Form.Label column sm={2}>
-            Country
-          </Form.Label>
-          <Col>
+        </h4>
+        <Form.Group
+          as={Row}
+          className="mb-3 d-flex flex-column"
+          controlId="country"
+        >
+          <Col sm={6} className="mx-auto">
             <Form.Select
               value={searchParams.get("country")}
               onChange={updateCountryFilter}
             >
               <option>-Select a country-</option>
               {countries.map((country) => (
-                <option value={country.iso_alpha_3_code}>
-                  {country.name}
-                </option>
+                <option value={country.iso_alpha_3_code}>{country.name}</option>
               ))}
             </Form.Select>
           </Col>
         </Form.Group>
       </div>
 
-
-      <EditableList 
-        data={formattedData}  
+      <EditableList
+        data={formattedData}
         defaultEntry={{
           year: "",
           ...Object.values(indicators)
-            .map(indicator => indicator.short_name)
-            .reduce((a, v) => ({ ...a, [v]: ""}), {})
+            .map((indicator) => indicator.short_name)
+            .reduce((a, v) => ({ ...a, [v]: "" }), {}),
         }}
         entryPropNames={[
-          "Year", ...Object.keys(indicators).map(id => indicators[id].short_name)
+          "Year",
+          ...Object.keys(indicators).map((id) => indicators[id].short_name),
         ]}
         onSave={handleSave}
       />

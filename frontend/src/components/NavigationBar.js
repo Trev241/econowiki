@@ -38,7 +38,13 @@ export default function NavigationBar() {
   }, [navigate, setUser]);
 
   return (
-    <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+    <Navbar
+      collapseOnSelect
+      expand="lg"
+      bg="dark"
+      variant="dark"
+      className="py-4"
+    >
       <Container>
         <Logo color={"white"} />
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
@@ -78,6 +84,7 @@ export default function NavigationBar() {
                   variant="outline-secondary"
                   onClick={() => navigate("/login")}
                   size="sm"
+                  style={{ marginLeft: "3rem" }}
                 >
                   Login
                 </Button>

@@ -19,6 +19,7 @@ from models import (
 from sqlalchemy.exc import NoResultFound
 from predictions.forecaster import Forecaster
 from middleware import isNotAuth, isAuth
+import json
 
 import bcrypt
 import re
@@ -137,7 +138,17 @@ def delete_value(id):
 def login():
     kwargs = {}
 
-    nameOrEmail = request.json.get('nameOrEmail', None)
+    nameOrEmail = request.json.get('nameOrEmail', "")
+    password = request.json.get('password', "")
+
+    errors = {}
+    if len(nameOrEmail.strip()) == 0:
+        errors['nameOrEmail'] = 'Name/Email must not be empty!'
+    if len(password.strip()) < 8:
+        errors['password'] = 'Password length must be >= 8!'
+    if json.dumps(errors) != "{}":
+        return jsonify({"status": 403, "errors": errors})
+    
     emailRegex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
     if re.fullmatch(emailRegex, nameOrEmail):
         kwargs['email'] = nameOrEmail
@@ -146,9 +157,10 @@ def login():
 
     try:
         user = User.query.filter_by(**kwargs).one()
-        if not bcrypt.checkpw(request.json.get('password', None).encode('utf-8'),
-            user.password):
+        if not bcrypt.checkpw(password.encode('utf-8'), user.password):
             raise Exception("Wrong credentials!")
+        if not user.accepted:
+            raise Exception("Admin hasn't accepted your request yet, try again later!")
 
         token = create_access_token(identity=user.id, expires_delta=False)
         response = make_response(jsonify({'user': user_schema.jsonify(user).json,
@@ -160,16 +172,28 @@ def login():
         print(e)
         return jsonify({
             'status': 401,
-            'message': 'Wrong credentials!'
+            'message': str(e)
         })
 
 @app.route('/auth/signup', methods=['POST'])
 @isNotAuth()
 def create_user():
-    user = User(
-        email=request.json.get('email', None),
-        username=request.json.get('username', None),
-        password=bcrypt.hashpw(request.json.get('password', None).encode('utf-8'),
+    email=request.json.get('email', ""),
+    username=request.json.get('username', ""),
+    password=request.json.get('password', ""),
+
+    errors = {}
+    if len(username.strip()) == 0:
+        errors['username'] = 'Username must not be empty!'
+    if not re.fullmatch(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', email.strip()):
+        errors['email'] = 'Email must be an actual email!'
+    if len(password.strip()) < 8:
+        errors['password'] = 'Password length must be >= 8!'
+    if json.dumps(errors) != "{}":
+        return jsonify({"status": 403, "errors": errors})
+
+    user = User(email=email, username=username,
+        password=bcrypt.hashpw(password.encode('utf-8'),
             bcrypt.gensalt(12)),
     )
 
@@ -202,11 +226,15 @@ def get_users(accepted):
     users = users_schema.dump(users)
     return jsonify({'status': 200, 'users': jsonify(users).json})
 
-@app.route('/user/accept/<uid>', methods=['POST'])
+@app.route('/user/confirm', methods=['POST'])
 @isAuth()
-def accept_user(uid):
-    user = User.query.get(int(uid))
-    user.accepted = True
+def confirm_signup():
+    uid = int(request.json.get('uid', "0"))
+    user = User.query.get(uid)
+    if int(request.json.get('accept')) == 1:
+        user.accepted = True
+    else:
+        User.query.filter(User.id == uid).delete()
 
     db.session.commit()
     return jsonify({'status': 200})

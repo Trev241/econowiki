@@ -6,8 +6,10 @@ import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { TiTick } from "react-icons/ti";
+import FormError from "../components/FormError";
 import Logo from "../components/Logo";
 import authService from "../services/AuthService";
+import Spinner from "react-bootstrap/Spinner";
 
 export default function Signup() {
   const [showFailedAlert, setShowFailedAlert] = useState(false);
@@ -17,6 +19,13 @@ export default function Signup() {
     password: "",
     confirmPassword: "",
   });
+  const [errors, setErrors] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [loading, setLoading] = useState(false);
   const [showRegistered, setShowRegistered] = useState(false);
 
   const updateForm = (e) => {
@@ -28,16 +37,38 @@ export default function Signup() {
     async (e) => {
       e.preventDefault();
 
-      const response = await authService.signup(
-        form.username,
-        form.email,
-        form.password
-      );
-      if (response.data.status === 200) {
-        setShowRegistered(true);
-        return;
+      const _errors = {};
+      if (form.username.trim().length === 0)
+        _errors.username = "Username must not be empty!";
+      if (
+        !form.email
+          .trim()
+          .match(
+            /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          )
+      )
+        _errors.email = "Email must be an actual email!";
+      if (form.password.trim().length < 8)
+        _errors.password = "Password length must be >= 8!";
+      else if (form.password.trim() !== form.confirmPassword.trim())
+        _errors.confirmPassword = "Passwords must match!";
+
+      setErrors(_errors);
+
+      if (JSON.stringify(_errors) === "{}") {
+        setLoading(true);
+        const response = await authService.signup(
+          form.username,
+          form.email,
+          form.password
+        );
+        setLoading(false);
+        if (response.data.status === 200) {
+          setShowRegistered(true);
+          return;
+        }
+        setShowFailedAlert(true);
       }
-      setShowFailedAlert(true);
     },
     [form]
   );
@@ -89,7 +120,9 @@ export default function Signup() {
                     name="username"
                     value={form.username}
                     onChange={(e) => updateForm(e)}
+                    style={{ border: errors.username && "1px solid red" }}
                   />
+                  <FormError message={errors.username} />
                 </Form.Group>
 
                 <Form.Group className="mb-3">
@@ -100,7 +133,9 @@ export default function Signup() {
                     name="email"
                     value={form.email}
                     onChange={(e) => updateForm(e)}
+                    style={{ border: errors.email && "1px solid red" }}
                   />
+                  <FormError message={errors.email} />
                 </Form.Group>
 
                 <Form.Group className="mb-5">
@@ -110,7 +145,9 @@ export default function Signup() {
                     name="password"
                     value={form.password}
                     onChange={(e) => updateForm(e)}
+                    style={{ border: errors.password && "1px solid red" }}
                   />
+                  <FormError message={errors.password} />
                 </Form.Group>
 
                 <Form.Group className="mb-5">
@@ -120,11 +157,19 @@ export default function Signup() {
                     name="confirmPassword"
                     value={form.confirmPassword}
                     onChange={(e) => updateForm(e)}
+                    style={{
+                      border: errors.confirmPassword && "1px solid red",
+                    }}
                   />
+                  <FormError message={errors.confirmPassword} />
                 </Form.Group>
 
                 <Button className="w-100" type="submit">
-                  SignUp
+                  {loading ? (
+                    <Spinner animation="border" variant="light" size="sm" />
+                  ) : (
+                    "SignUp"
+                  )}
                 </Button>
               </Form>
             )}
