@@ -23,6 +23,10 @@ import json
 
 import bcrypt
 import re
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from utils import sendMail
 
 @app.route('/country', methods=['GET'])
 def get_countries():
@@ -178,9 +182,9 @@ def login():
 @app.route('/auth/signup', methods=['POST'])
 @isNotAuth()
 def create_user():
-    email=request.json.get('email', ""),
-    username=request.json.get('username', ""),
-    password=request.json.get('password', ""),
+    email=request.json.get('email', "")
+    username=request.json.get('username', "")
+    password=request.json.get('password', "")
 
     errors = {}
     if len(username.strip()) == 0:
@@ -200,6 +204,16 @@ def create_user():
     db.session.add(user)
     db.session.commit()
 
+    admins = User.query.filter_by(type=UserType.ADMINISTRATOR)
+
+    for admin in admins:
+        body = f'''
+            <p>Hello <b>ADMIN @{admin.username}</b>, a new user has signed up, visit the dashboard to accept/reject the user!</p>
+            <span>DASHBOARD: <a href="http://localhost:3000/dashboard">http://localhost:3000/dashboard</a></span>
+            <br />
+            <span>MEMBER: <b>@{user.username}</b></span>
+        '''
+        sendMail(admin.email, 'user registration alert!', body)
     return jsonify({'status': 200})
 
 @app.route('/auth/logout', methods=['POST'])
@@ -233,8 +247,17 @@ def confirm_signup():
     user = User.query.get(uid)
     if int(request.json.get('accept')) == 1:
         user.accepted = True
+        body = f'''
+            <p>Welcome <b>@{user.username}</b>, you are officially a MEMBER of the WORLD INCOME!</p>
+            <span>Login: <a href="http://localhost:3000/login">http://localhost:3000/login</a></span>
+        '''
+        sendMail(user.email, 'user acceptance alert!', body)
     else:
         User.query.filter(User.id == uid).delete()
+        body = f'''
+            <p>Hello <b>@{user.username}</b>, the admin has rejected your registration!</p>
+        '''
+        sendMail(user.email, 'user acceptance alert!', body)
 
     db.session.commit()
     return jsonify({'status': 200})

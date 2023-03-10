@@ -40,11 +40,13 @@ export default function Signup() {
       const _errors = {};
       if (form.username.trim().length === 0)
         _errors.username = "Username must not be empty!";
+      else if (!isNaN(form.username.trim()))
+        _errors.username = "Username must have atleast 1 character!";
       if (
         !form.email
           .trim()
           .match(
-            /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
           )
       )
         _errors.email = "Email must be an actual email!";
@@ -86,7 +88,7 @@ export default function Signup() {
                 <span style={{ fontWeight: "bold", marginTop: "1rem" }}>
                   You have registered successfully!
                 </span>
-                <span style={{ fontSize: "0.9rem" }}>
+                <span style={{ fontSize: "0.8rem" }}>
                   Admin will respond to your request as soon as possible!
                 </span>
                 <span style={{ fontSize: "0.8rem" }}>
@@ -129,7 +131,6 @@ export default function Signup() {
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     type="email"
-                    autoFocus
                     name="email"
                     value={form.email}
                     onChange={(e) => updateForm(e)}
