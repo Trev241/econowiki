@@ -56,6 +56,8 @@ class CountryIndicatorValue(db.Model):
     country = db.relationship('Country', backref=db.backref('values', lazy=True))
     indicator = db.relationship('EconomicIndicator', backref=db.backref('values', lazy=True))
 
+    constraint = db.UniqueConstraint(country_id, indicator_id, year, name='u_cty_ind_yr')
+
     def __init__(self, country_id, indicator_id, year, value):
         self.country_id = country_id
         self.indicator_id = indicator_id
@@ -85,12 +87,12 @@ class User(db.Model):
     type = db.Column(db.Enum(UserType))
     createdAt = db.Column(db.DateTime(), nullable=False)
 
-    def __init__(self, username, email, password ):
+    def __init__(self, username, email, password, accepted=False, type=UserType.MEMBER):
         self.email = email
         self.username = username
         self.password = password
-        self.accepted = False
-        self.type = UserType.MEMBER
+        self.accepted = accepted
+        self.type = type
         self.createdAt = datetime.now()
 
 class UserSchema(ma.Schema):

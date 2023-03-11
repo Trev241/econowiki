@@ -3,6 +3,9 @@
 import re
 import pandas as pd
 import app
+import bcrypt
+
+from models import User, UserType
 
 # Create database
 app.db.create_all()
@@ -51,8 +54,7 @@ for name, file in RESOURCES.items():
     
     # Fetch indicator id    
     indicator_id = app.EconomicIndicator.query.with_entities(app.EconomicIndicator.id).filter_by(short_name=name).one()[0]
-    # Ignoring first column since it contains country names
-    years = data.columns[1:]
+    years = data.columns
 
     for row in data.itertuples():
         try:
@@ -74,4 +76,17 @@ for name, file in RESOURCES.items():
             print(f'Could not find ID for {row[0]}! Data excluded from migration')
 
 app.db.session.commit()
+
+# Create a root user
+root = User(
+    email="admin@gmail.com",
+    username="admin",
+    password=bcrypt.hashpw("admin1234".encode('utf-8'), bcrypt.gensalt(12)),
+    accepted=True,
+    type=UserType.ADMINISTRATOR
+)
+app.db.session.add(root)
+app.db.session.commit()
+
+# Close session
 app.db.session.close()

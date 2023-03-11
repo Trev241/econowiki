@@ -28,7 +28,13 @@ ma = Marshmallow(app)
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)
 
-from routes import *
+# Setting up routes
+from routes.auth import *
+from routes.country import *
+from routes.indicator import *
+from routes.prediction import *
+from routes.user import *
+from routes.value import *
 
 if __name__ == '__main__':
     # from models import User
