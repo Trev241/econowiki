@@ -21,9 +21,7 @@ function App() {
     cAxios
       .get("/auth/user")
       .then((res) => {
-        if (res.data.status === 200) {
-          setUser(res.data.user);
-        }
+        setUser(res.data);
       })
       .finally(() => {
         setLoading(false);

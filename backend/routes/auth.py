@@ -7,6 +7,7 @@ from flask import jsonify, request, make_response
 from flask_jwt_extended import create_access_token
 from middleware import isAuth, isNotAuth
 from utils import sendMail
+from sqlalchemy.exc import IntegrityError
 from models import (
     UserType,
     User,
@@ -27,7 +28,7 @@ def login():
     if len(password.strip()) < 8:
         errors['password'] = 'Password length must be >= 8!'
     if json.dumps(errors) != "{}":
-        return jsonify({"status": 403, "errors": errors})
+        return jsonify(errors), 403
     
     emailRegex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
     if re.fullmatch(emailRegex, nameOrEmail):
@@ -43,17 +44,13 @@ def login():
             raise Exception("Admin hasn't accepted your request yet, try again later!")
 
         token = create_access_token(identity=user.id, expires_delta=False)
-        response = make_response(jsonify({'user': user_schema.jsonify(user).json,
-            'status': 200}))
+        response = make_response(jsonify(user_schema.jsonify(user).json), 200)
         response.set_cookie('token', token, 60 * 60 * 24 * 7)
         return response
         
     except Exception as e:
         print(e)
-        return jsonify({
-            'status': 401,
-            'message': str(e)
-        })
+        return jsonify({'message': str(e)}), 401
 
 @app.route('/auth/signup', methods=['POST'])
 @isNotAuth()
@@ -70,33 +67,36 @@ def create_user():
     if len(password.strip()) < 8:
         errors['password'] = 'Password length must be >= 8!'
     if json.dumps(errors) != "{}":
-        return jsonify({"status": 403, "errors": errors})
+        return jsonify(errors), 400
 
-    user = User(
-        email=email, 
-        username=username,
-        password=bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(12)),
-    )
+    try:
+        user = User(
+            email=email, 
+            username=username,
+            password=bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(12)),
+        )
 
-    db.session.add(user)
-    db.session.commit()
+        db.session.add(user)
+        db.session.commit()
 
-    admins = User.query.filter_by(type=UserType.ADMINISTRATOR)
+        admins = User.query.filter_by(type=UserType.ADMINISTRATOR)
 
-    for admin in admins:
-        body = f'''
-            <p>Hello <b>ADMIN @{admin.username}</b>, a new user has signed up, visit the dashboard to accept/reject the user!</p>
-            <span>DASHBOARD: <a href="http://localhost:3000/dashboard">http://localhost:3000/dashboard</a></span>
-            <br />
-            <span>MEMBER: <b>@{user.username}</b></span>
-        '''
-        sendMail(admin.email, 'user registration alert!', body)
-    return jsonify({'status': 200})
+        for admin in admins:
+            body = f'''
+                <p>Hello <b>ADMIN @{admin.username}</b>, a new user has signed up, visit the dashboard to accept/reject the user!</p>
+                <span>DASHBOARD: <a href="http://localhost:3000/dashboard">http://localhost:3000/dashboard</a></span>
+                <br />
+                <span>MEMBER: <b>@{user.username}</b></span>
+            '''
+            sendMail(admin.email, 'user registration alert!', body)
+        return jsonify({'message': 'User registration success'}), 200
+    except IntegrityError:
+        return jsonify({'message': 'An account with the given email or username already exists. Please login instead'}), 422
 
 @app.route('/auth/logout', methods=['POST'])
 @isAuth()
 def logout_user():
-    response = make_response(jsonify({'status': 200}))
+    response = make_response({'message': 'User logout success'}, 200)
     response.set_cookie('token', '', 0)
     return response
 
@@ -104,5 +104,5 @@ def logout_user():
 @isAuth()
 def get_user():
     user = User.query.get(request.uid)
-    return jsonify({'status': 200, 'user': user_schema.jsonify(user).json})
+    return user_schema.jsonify(user), 200
     

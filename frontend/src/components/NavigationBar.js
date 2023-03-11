@@ -18,22 +18,16 @@ export default function NavigationBar() {
   const selectRef = useRef(null);
 
   useEffect(() => {
-    async function fetchData() {
+    (async () => {
       const response = await cAxios.get("/country");
-      if (response.data.status === 200) {
-        setCountries(response.data.countries);
-      }
-    }
-
-    fetchData();
+      setCountries(response.data);
+    })();
   }, [setCountries]);
 
   const logout = useCallback(() => {
-    cAxios.post("/auth/logout").then((res) => {
-      if (res.data.status === 200) {
-        navigate("/");
-        setUser(null);
-      }
+    cAxios.post("/auth/logout").then(() => {
+      navigate("/");
+      setUser(null);
     });
   }, [navigate, setUser]);
 

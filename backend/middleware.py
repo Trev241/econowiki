@@ -10,8 +10,7 @@ def isNotAuth():
             try:
                 if token:
                     payload = decode_token(token)
-                    return jsonify({'status': 500,
-                                    'message': 'You are already authenticated!'})
+                    return jsonify({'message': 'You are already authenticated!'}), 500
             except exceptions.JWTDecodeError as e:
                 print(e)
             response = f(*args, **kwargs)
@@ -27,13 +26,13 @@ def isAuth():
             token = request.cookies.get('token', None)
             try:
                 if not token:
-                    raise exceptions.JWTDecodeError("Token is corrupted!")
+                    raise exceptions.JWTDecodeError()
                 payload = decode_token(token)
                 request.uid = payload.get('sub', None)
                 response = f(*args, **kwargs)
                 return response
             except exceptions.JWTDecodeError as e:
                 print(e)
-                return jsonify({'status': 401, 'message': 'Token is corrupted!'})
+                return jsonify({'message': 'Unauthorized access - token could not be decoded because it is either malformed or does not exist.'}), 401
         return __isAuth
     return _isAuth

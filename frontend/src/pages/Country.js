@@ -13,7 +13,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 
-import { UserType } from "../constants";
+import { cAxios, UserType } from "../constants";
 import Spinner from "../components/Spinner";
 import {
   CartesianGrid,
@@ -53,25 +53,18 @@ export default function Country() {
         let response;
 
         // Fetch country
-        response = await fetch(`http://localhost:5001/country/${params.id}`, {
-          credentials: "include",
-        });
-        const result = await response.json();
-        const _country = result.country;
+        response = await cAxios.get(`/country/${params.id}`);
+        const _country = await response.data;
         setCountry(_country);
 
         // Fetch indicators
-        response = await fetch(`http://localhost:5001/indicator`, {
-          credentials: "include",
-        });
-        const _indicators = await response.json();
+        response = await cAxios.get(`/indicator`);
+        const _indicators = await response.data;
         setIndicators(_indicators);
 
         // Fetch values
-        response = await fetch(`http://localhost:5001/value/${params.id}`, {
-          credentials: "include",
-        });
-        const _values = await response.json();
+        response = await cAxios.get(`/value/${params.id}`);
+        const _values = await response.data;
 
         // Fetch predictions
         let _predictions = [];
@@ -91,20 +84,13 @@ export default function Country() {
           for (let year = minYear; year <= maxYear + 3; year++)
             years.push(year);
 
-          const response = await fetch(`http://localhost:5001/prediction`, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              iso_alpha_3_code: _country.iso_alpha_3_code,
-              indicator_short_name: indicator.short_name,
-              years: years,
-            }),
-          });
+          const response = await cAxios.post(`/prediction`, {
+            iso_alpha_3_code: _country.iso_alpha_3_code,
+            indicator_short_name: indicator.short_name,
+            years: years,
+          })
 
-          const result = await response.json();
+          const result = await response.data;
           _predictions.push(result);
         }
 

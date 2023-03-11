@@ -12,6 +12,7 @@ import authService from "../services/AuthService";
 import Spinner from "react-bootstrap/Spinner";
 
 export default function Signup() {
+  const [errorMessage, setErrorMessage] = useState();
   const [showFailedAlert, setShowFailedAlert] = useState(false);
   const [form, setForm] = useState({
     username: "",
@@ -59,17 +60,20 @@ export default function Signup() {
 
       if (JSON.stringify(_errors) === "{}") {
         setLoading(true);
-        const response = await authService.signup(
+        await authService.signup(
           form.username,
           form.email,
           form.password
-        );
-        setLoading(false);
-        if (response.data.status === 200) {
+        )
+        .then(() => {
           setShowRegistered(true);
-          return;
-        }
-        setShowFailedAlert(true);
+        })
+        .catch(error => {
+          console.error(error);
+          setErrorMessage(error.response.data.message);
+          setShowFailedAlert(true);
+        });
+        setLoading(false);
       }
     },
     [form]
@@ -108,11 +112,9 @@ export default function Signup() {
                   styles={{ textAlign: "center", marginBottom: "2rem" }}
                 />
 
-                {showFailedAlert && (
-                  <Alert className="mb-4" variant="danger">
-                    Failed to log in
-                  </Alert>
-                )}
+                <Alert show={showFailedAlert} className="mb-4" variant="danger">
+                  {errorMessage}
+                </Alert>
 
                 <Form.Group className="mb-3">
                   <Form.Label>Name</Form.Label>
@@ -139,7 +141,7 @@ export default function Signup() {
                   <FormError message={errors.email} />
                 </Form.Group>
 
-                <Form.Group className="mb-5">
+                <Form.Group className="mb-3">
                   <Form.Label>Password</Form.Label>
                   <Form.Control
                     type="password"
@@ -165,7 +167,7 @@ export default function Signup() {
                   <FormError message={errors.confirmPassword} />
                 </Form.Group>
 
-                <Button className="w-100" type="submit">
+                <Button className="w-100" type="submit" disabled={loading}>
                   {loading ? (
                     <Spinner animation="border" variant="light" size="sm" />
                   ) : (

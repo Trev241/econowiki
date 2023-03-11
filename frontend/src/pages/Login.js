@@ -48,17 +48,20 @@ export default function Login() {
 
       if (JSON.stringify(_errors) === "{}") {
         setLoading(true);
-        const response = await authService.login(
+        await authService.login(
           form.nameOrEmail,
           form.password
-        );
-        setLoading(false);
-        if (response.data.status === 200) {
-          setUser(response.data.user);
+        )
+        .then(response => {
+          setUser(response.data);
           navigate("/");
-          return;
-        }
-        setServerError(response.data.message);
+        })
+        .catch(error => {
+          console.log(error);
+          setServerError(error?.response?.data?.message || error.message);
+        });
+
+        setLoading(false);
       }
     },
     [form, navigate, setUser]
@@ -116,7 +119,7 @@ export default function Login() {
                 <FormError message={errors.password} />
               </Form.Group>
 
-              <Button className="w-100" type="submit">
+              <Button className="w-100" type="submit" disabled={loading}>
                 {loading ? (
                   <Spinner animation="border" variant="light" size="sm" />
                 ) : (

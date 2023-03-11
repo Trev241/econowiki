@@ -17,7 +17,7 @@ def get_users(accepted):
     else:
         users = User.query.filter(User.accepted == True).all()
     users = users_schema.dump(users)
-    return jsonify({'status': 200, 'users': jsonify(users).json})
+    return jsonify(users), 200
 
 @app.route('/user/confirm', methods=['POST'])
 @isAuth()
@@ -39,7 +39,7 @@ def confirm_signup():
         sendMail(user.email, 'user acceptance alert!', body)
 
     db.session.commit()
-    return jsonify({'status': 200})
+    return jsonify({'message': 'User operation succeeded'}), 200
         
 @app.route('/user/promote/<uid>/<promote>', methods=['POST'])
 def promote_user(uid, promote):
@@ -51,4 +51,4 @@ def promote_user(uid, promote):
         user.type = types[types.index(user.type) + 1].value
 
     db.session.commit()
-    return jsonify({'status': 200, 'type': user.type})
+    return jsonify({'type': user.type}), 200

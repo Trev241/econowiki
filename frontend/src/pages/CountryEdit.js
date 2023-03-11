@@ -51,7 +51,7 @@ export default function CountryEdit() {
         setIndicators(_indicators);
 
         response = await cAxios.get(`/country`);
-        if (response.data.status === 200) setCountries(response.data.countries);
+        setCountries(response.data);
       } catch (error) {
         showError(error);
       }
@@ -65,9 +65,7 @@ export default function CountryEdit() {
 
         // Fetch country
         response = await cAxios.get(`/country/${searchParams.get("country")}`);
-        if (response.data.status) {
-          setCountry(response.data.country);
-        }
+        setCountry(response.data);
 
         // Fetch values of country
         response = await cAxios.get(`/value/${searchParams.get("country")}`);

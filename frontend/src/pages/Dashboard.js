@@ -177,13 +177,13 @@ export default function Dashboard() {
     setLoading(true);
     Promise.all([
       cAxios.get("/users/0").then((res) => {
-        if (res.data.status === 200) {
-          setPending(res.data.users);
+        if (res.status === 200) {
+          setPending(res.data);
         }
       }),
       cAxios.get("/users/1").then((res) => {
-        if (res.data.status === 200) {
-          setUsers(res.data.users);
+        if (res.status === 200) {
+          setUsers(res.data);
         }
       }),
     ]).then(() => {
@@ -198,26 +198,22 @@ export default function Dashboard() {
   }, [user, navigate]);
 
   const confirmUser = useCallback((u, accept) => {
-    cAxios.post(`/user/confirm`, { uid: u.id, accept }).then((res) => {
-      if (res.data.status === 200) {
-        setPending((prev) => prev.filter((_u) => _u.id !== u.id));
-        if (accept === 1) {
-          setUsers((prev) => [u, ...prev]);
-        }
+    cAxios.post(`/user/confirm`, { uid: u.id, accept }).then(() => {
+      setPending((prev) => prev.filter((_u) => _u.id !== u.id));
+      if (accept === 1) {
+        setUsers((prev) => [u, ...prev]);
       }
     });
   }, []);
 
   const promoteUser = useCallback((u, p) => {
     cAxios.post(`/user/promote/${u.id}/${p}`).then((res) => {
-      if (res.data.status === 200) {
-        setUsers((prev) => {
-          const result = [...prev];
-          const uidx = result.findIndex((_u) => _u.id === u.id);
-          result[uidx].type = res.data.type;
-          return result;
-        });
-      }
+      setUsers((prev) => {
+        const result = [...prev];
+        const uidx = result.findIndex((_u) => _u.id === u.id);
+        result[uidx].type = res.data.type;
+        return result;
+      });
     });
   }, []);
 
