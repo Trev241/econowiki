@@ -5,7 +5,9 @@ from models import (
     Country,
     CountryIndicatorValue,
     country_val_schema,
-    country_vals_schema
+    country_vals_schema,
+    Log,
+    LogType
 )
 
 @app.route('/value/<iso_alpha_3_code>', methods=['GET'])
@@ -26,8 +28,10 @@ def add_value():
         year=request.json.get('year', None), 
         value=request.json.get('value', None)
     )
+    log = Log(request.uid, LogType.CREATE)
 
     db.session.add(new_value)
+    db.session.add(log)
     db.session.commit()
 
     return country_val_schema.jsonify(new_value), 200
@@ -42,6 +46,9 @@ def update_value(id):
     entry.year = request.json.get('year', None)
     entry.value = request.json.get('value', None)
 
+    log = Log(request.uid, LogType.UPDATE)
+
+    db.session.add(log)
     db.session.commit()
 
     return country_val_schema.jsonify(entry), 200
@@ -51,6 +58,9 @@ def update_value(id):
 def delete_value(id):
     entry = CountryIndicatorValue.query.get(int(id))
     db.session.delete(entry)
+    log = Log(request.uid, LogType.DELETE)
+
+    db.session.add(log)
     db.session.commit()
 
     return country_val_schema.jsonify(entry), 200

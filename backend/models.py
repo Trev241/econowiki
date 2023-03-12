@@ -1,6 +1,7 @@
 from app import db, ma
 from datetime import datetime
 from enum import Enum
+from marshmallow import fields
 
 class Country(db.Model):
     __tablename__ = 'country'
@@ -101,3 +102,31 @@ class UserSchema(ma.Schema):
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+
+class LogType(str, Enum):
+    CREATE = "CREATE"
+    UPDATE = "UPDATE"
+    DELETE = "DELETE" 
+
+
+class Log(db.Model):
+    __tablename__ = 'log'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user = db.relationship("User", backref=db.backref("user", uselist=False))
+    type = db.Column(db.Enum(LogType))
+    createdAt = db.Column(db.DateTime(), nullable=False)
+
+    def __init__(self, user_id, type):
+        self.user_id = user_id
+        self.type = type
+        self.createdAt = datetime.now()
+
+class LogSchema(ma.Schema):
+    user = fields.Nested(UserSchema)
+    class Meta:
+        fields = ('id', 'user', 'type', 'createdAt')
+
+log_schema = LogSchema()
+logs_schema = LogSchema(many=True)

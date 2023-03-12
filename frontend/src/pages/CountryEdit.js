@@ -52,16 +52,6 @@ export default function CountryEdit() {
 
         response = await cAxios.get(`/country`);
         setCountries(response.data);
-      } catch (error) {
-        showError(error);
-      }
-    })();
-  }, [showError]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        let response;
 
         // Fetch country
         response = await cAxios.get(`/country/${searchParams.get("country")}`);
@@ -76,10 +66,11 @@ export default function CountryEdit() {
           if (!dataByYears[entry.year]) dataByYears[entry.year] = {};
 
           // TODO: Change dependency behaviour - indicators is sometimes undefined
-          dataByYears[entry.year][indicators[entry.indicator_id].short_name] = {
-            value: entry.value,
-            id: entry.id,
-          };
+          dataByYears[entry.year][_indicators[entry.indicator_id].short_name] =
+            {
+              value: entry.value,
+              id: entry.id,
+            };
         });
 
         // Convert into list for future components to consume
@@ -98,7 +89,7 @@ export default function CountryEdit() {
         showError(error);
       }
     })();
-  }, [searchParams, countries, indicators, showError]);
+  }, [showError, indicators, searchParams]);
 
   useEffect(() => {
     if (user.type === UserType.MEMBER) {

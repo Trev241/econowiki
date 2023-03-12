@@ -19,7 +19,7 @@ import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
 import Spinner from "../components/Spinner";
-import { cAxios, LogOps, UserType } from "../constants";
+import { cAxios, LogType, UserType } from "../constants";
 
 function Item({
   user,
@@ -140,11 +140,11 @@ function Log({ log }) {
   return (
     <div className="d-flex justify-content-between align-items-center m-3">
       <span className="w-25" style={{ fontSize: ".8rem" }}>
-        {log.operation === LogOps.CREATE ? (
+        {log.type === LogType.CREATE ? (
           <span className="bg-success text-light rounded-circle p-1">
             <MdOutlineNoteAdd />
           </span>
-        ) : log.operation === LogOps.UPDATE ? (
+        ) : log.type === LogType.UPDATE ? (
           <span className="bg-warning text-light rounded-circle p-1">
             <FiEdit2 />
           </span>
@@ -155,11 +155,20 @@ function Log({ log }) {
         )}
       </span>
       <span className="w-25" style={{ fontSize: ".8rem" }}>
-        <span className="text-secondary">@</span>
-        {log.username}
+        <span className="text-secondary">
+          {log.user.type === UserType.ADMINISTRATOR ? (
+            <GrUserAdmin />
+          ) : log.user.type === UserType.MODERATOR ? (
+            <RiAdminLine />
+          ) : (
+            <AiOutlineUser />
+          )}{" "}
+          &nbsp;
+        </span>
+        {log.user.username}
       </span>
       <span style={{ fontSize: "0.8rem", textAlign: "right" }} className="w-50">
-        {log.datetime}
+        {new Date(log.createdAt).toLocaleString()}
       </span>
     </div>
   );
@@ -168,6 +177,7 @@ function Log({ log }) {
 export default function Dashboard() {
   const [pending, setPending] = useState([]);
   const [users, setUsers] = useState([]);
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const { user } = useContext(AuthContext);
@@ -177,14 +187,13 @@ export default function Dashboard() {
     setLoading(true);
     Promise.all([
       cAxios.get("/users/0").then((res) => {
-        if (res.status === 200) {
-          setPending(res.data);
-        }
+        setPending(res.data);
       }),
       cAxios.get("/users/1").then((res) => {
-        if (res.status === 200) {
-          setUsers(res.data);
-        }
+        setUsers(res.data);
+      }),
+      cAxios.get("/logs").then((res) => {
+        setLogs(res.data);
       }),
     ]).then(() => {
       setLoading(false);
@@ -255,24 +264,8 @@ export default function Dashboard() {
                 <BiBookAlt /> &nbsp;Logs
               </Accordion.Header>
               <Accordion.Body>
-                {[
-                  {
-                    datetime: "06/Mar/2023 16:19:15",
-                    username: "john",
-                    operation: "CREATE",
-                  },
-                  {
-                    datetime: "06/Mar/2023 16:19:16",
-                    username: "james",
-                    operation: "UPDATE",
-                  },
-                  {
-                    datetime: "06/Mar/2023 16:19:17",
-                    username: "jim",
-                    operation: "DELETE",
-                  },
-                ].map((l) => (
-                  <Log key={l.datetime} log={l} />
+                {logs.map((l) => (
+                  <Log key={l.id} log={l} />
                 ))}
               </Accordion.Body>
             </Accordion.Item>

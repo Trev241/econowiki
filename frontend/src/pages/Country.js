@@ -54,17 +54,17 @@ export default function Country() {
 
         // Fetch country
         response = await cAxios.get(`/country/${params.id}`);
-        const _country = await response.data;
+        const _country = response.data;
         setCountry(_country);
 
         // Fetch indicators
         response = await cAxios.get(`/indicator`);
-        const _indicators = await response.data;
+        const _indicators = response.data;
         setIndicators(_indicators);
 
         // Fetch values
         response = await cAxios.get(`/value/${params.id}`);
-        const _values = await response.data;
+        const _values = response.data;
 
         // Fetch predictions
         let _predictions = [];
@@ -88,9 +88,9 @@ export default function Country() {
             iso_alpha_3_code: _country.iso_alpha_3_code,
             indicator_short_name: indicator.short_name,
             years: years,
-          })
+          });
 
-          const result = await response.data;
+          const result = response.data;
           _predictions.push(result);
         }
 

@@ -11,7 +11,7 @@ export const UserType = {
   MEMBER: "MEMBER",
 };
 
-export const LogOps = {
+export const LogType = {
   CREATE: "CREATE",
   UPDATE: "UPDATE",
   DELETE: "DELETE",

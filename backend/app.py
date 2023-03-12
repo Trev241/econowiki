@@ -35,10 +35,11 @@ from routes.indicator import *
 from routes.prediction import *
 from routes.user import *
 from routes.value import *
+from routes.log import *
 
 if __name__ == '__main__':
-    # from models import User
-    # User.__table__.drop(db.engine)
+    # from models import Log
+    # Log.__table__.drop(db.engine)
 
     # db.create_all()
     app.run(debug=True, port=5001)
