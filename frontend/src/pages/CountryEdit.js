@@ -89,7 +89,7 @@ export default function CountryEdit() {
         showError(error);
       }
     })();
-  }, [showError, indicators, searchParams]);
+  }, [showError, searchParams]);
 
   useEffect(() => {
     if (user.type === UserType.MEMBER) {
@@ -217,7 +217,12 @@ export default function CountryEdit() {
             >
               <option>-Select a country-</option>
               {countries.map((country) => (
-                <option value={country.iso_alpha_3_code}>{country.name}</option>
+                <option
+                  value={country.iso_alpha_3_code}
+                  key={country.iso_alpha_3_code}
+                >
+                  {country.name}
+                </option>
               ))}
             </Form.Select>
           </Col>
@@ -226,6 +231,7 @@ export default function CountryEdit() {
 
       <EditableList
         data={formattedData}
+        setData={setFormattedData}
         defaultEntry={{
           year: "",
           ...Object.values(indicators)
