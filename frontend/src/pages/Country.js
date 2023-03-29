@@ -63,69 +63,15 @@ export default function Country() {
         setIndicators(_indicators);
 
         // Fetch values
-        response = await cAxios.get(`/value/${params.id}`);
+        response = await cAxios.get(`/value/${params.id}?withProjected=true`);
         const _values = response.data;
 
-        // Fetch predictions
-        let _predictions = [];
-        let minYear = _values[0]?.year;
-        let maxYear = _values[0]?.year;
-        // It is better to use a regular for-of loop here instead of a forEach callback
-        // await behaviour is more conistent here compared to passing an async callback
-        for (const indicator of _indicators) {
-          for (const entry of _values) {
-            if (entry.indicator_id === indicator.id) {
-              maxYear = Math.max(maxYear, entry.year);
-              minYear = Math.min(minYear, entry.year);
-            }
-          }
-
-          let years = [];
-          for (let year = minYear; year <= maxYear + 3; year++)
-            years.push(year);
-
-          const response = await cAxios.post(`/prediction`, {
-            iso_alpha_3_code: _country.iso_alpha_3_code,
-            indicator_short_name: indicator.short_name,
-            years: years,
-          });
-
-          const result = response.data;
-          _predictions.push(result);
-        }
-
-        // Grouping values according to economic indicator
-        const data = [...Array(_indicators.length)].map(() => ({}));
-        for (const entry of _values) {
-          data[entry.indicator_id - 1][entry.year] = {
-            ...entry,
-            prediction: null,
-          };
-        }
-
-        // Including predictions
-        _predictions.forEach((predictionSet, idx) => {
-          Object.keys(predictionSet).forEach((year) => {
-            const future = !data[idx][year] && year >= maxYear;
-            // Create data point
-            if (future)
-              data[idx][year] = {
-                year: year,
-                value: null,
-              };
-
-            // Set projected values for current and near future
-            if (data[idx][year]?.value || future)
-              data[idx][year].prediction = predictionSet[year];
-          });
-        });
-
-        // Reconstruct as list to be consumed by recharts
-        const finalData = data.map((datasubset) =>
-          Object.keys(datasubset).map((year) => ({
+        // Reformat as list to be consumed by recharts
+        const finalData = Object.values(_values).map((datasubset) =>
+          Object.keys(datasubset.data).map((year) => ({
             year: year,
-            value: datasubset[year].value,
-            prediction: datasubset[year].prediction,
+            value: datasubset.data[year].value || null,
+            prediction: datasubset.data[year].prediction || null,
           }))
         );
 

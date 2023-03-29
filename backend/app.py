@@ -24,6 +24,9 @@ app.config['SQLALCHEMY_WARN_20'] = 1
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
+# Do not sort JSON response keys
+app.config['JSON_SORT_KEYS'] = False
+
 # Setting up Flask-JWT extension
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)

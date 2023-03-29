@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Container from "react-bootstrap/Container";
 import { AiOutlineLineChart } from "react-icons/ai";
-import EditableList from "./EditableList";
+import EditableList from "../components/EditableList";
 
 export default function Indicator() {
   const [indicators, setIndicators] = useState();

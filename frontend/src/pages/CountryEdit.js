@@ -8,7 +8,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
 import Spinner from "../components/Spinner";
 import { cAxios, UserType } from "../constants";
-import EditableList, { flags } from "./EditableList";
+import EditableList, { flags } from "../components/EditableList";
 import { BiErrorCircle } from "react-icons/bi";
 import Alert from "react-bootstrap/Alert";
 
@@ -60,17 +60,20 @@ export default function CountryEdit() {
         // Fetch values of country
         response = await cAxios.get(`/value/${searchParams.get("country")}`);
 
-        // Group data into years
+        // Arrange data by years
         const dataByYears = {};
-        response.data.forEach((entry) => {
-          if (!dataByYears[entry.year]) dataByYears[entry.year] = {};
+        Object.keys(response.data).forEach((indicator) => {
+          const entries = response.data[indicator].data;
+          Object.keys(entries).forEach((year) => {
+            // Create object if encountering current year for the first time
+            if (!dataByYears[year]) dataByYears[year] = {};
 
-          // TODO: Change dependency behaviour - indicators is sometimes undefined
-          dataByYears[entry.year][_indicators[entry.indicator_id].short_name] =
-            {
-              value: entry.value,
-              id: entry.id,
+            // Assign value and record id 
+            dataByYears[year][indicator] = {
+              id: entries[year].value_id,
+              value: entries[year].value
             };
+          });
         });
 
         // Convert into list for future components to consume

@@ -1,11 +1,13 @@
 from app import app, db
 from flask import jsonify, request
 from middleware import isAuth
+from collections import OrderedDict
+from predictions.forecaster import Forecaster
 from models import (
     Country,
     CountryIndicatorValue,
     country_val_schema,
-    country_vals_schema,
+    EconomicIndicator,
     Log,
     LogType
 )
@@ -15,9 +17,46 @@ from models import (
 def get_values(iso_alpha_3_code):
     id = Country.query.filter_by(iso_alpha_3_code=iso_alpha_3_code).one().id
     values = CountryIndicatorValue.query.filter_by(country_id=id).all()
-    result = country_vals_schema.dump(values)
 
-    return jsonify(result), 200
+    data = OrderedDict(
+        (
+            indicator.short_name, 
+            OrderedDict(
+                [('indicator_id', indicator.id),
+                 ('data', OrderedDict())]
+            )
+        ) for indicator in EconomicIndicator.query.all()
+    )
+
+    for entry in values:
+        data[entry.indicator.short_name]['data'][entry.year] = {
+            'value_id': entry.id,
+            'value': entry.value
+        }
+
+    if request.args.get('withProjected', False):
+        forecaster = Forecaster()
+        
+        for indicator, group in data.items():
+            years = list(map(int, list(group['data'].keys())))
+            
+            # Skip if no data available
+            if not years:
+                continue
+
+            input_years = years + [year for year in range(years[-1] + 1, years[-1] + 4)]
+            
+            predictions = forecaster.predict(id, group['indicator_id'], input_years)
+            for year, prediction in predictions.items():
+                prediction = round(prediction, 2)
+                datasubset = data[indicator]['data']
+
+                if year in datasubset:
+                    datasubset[year]['prediction'] = prediction
+                else:
+                    datasubset[year] = {'prediction' : prediction}
+
+    return jsonify(data), 200
 
 @app.route('/value/add', methods=['POST'])
 @isAuth()
