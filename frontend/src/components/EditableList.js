@@ -9,6 +9,7 @@ import Alert from "react-bootstrap/Alert";
 import { AiFillSave } from "react-icons/ai";
 import { AuthContext } from "../components/AuthProvider";
 import { UserType, modYears } from "../constants";
+import { BiErrorCircle } from "react-icons/bi";
 
 export const flags = new Set(["edited", "added", "delete", "editable"]);
 export default function EditableList({
@@ -19,7 +20,10 @@ export default function EditableList({
 }) {
   const [entries, setEntries] = useState(data);
   const [deletedEntries, setDeletedEntries] = useState([]);
+
+  const [error, setError] = useState('An unexpected error occurred.');
   const [showAlert, setShowAlert] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const { user } = useContext(AuthContext);
   const isModerator = useMemo(() => user.type === UserType.MODERATOR, [user]);
@@ -82,28 +86,53 @@ export default function EditableList({
     setEntries(_entries);
   };
 
+  const handleSave = async () => {
+    let result = false;
+    try {
+      result = await onSave(entries, deletedEntries);
+    } catch (error) {
+      setError(error.message);
+      console.error(error);
+    }
+    
+    setShowError(!result);
+    setShowAlert(!result);
+  }
+
   return (
     <>
-      <Alert
-        show={showAlert}
-        className="d-flex align-items-center my-5"
-        variant="warning"
-      >
-        <AiFillSave /> &nbsp;You have unsaved changes.&nbsp;
-        {deletedEntries.length > 0 && (
-          <div>
-            <b>{deletedEntries.length} item(s)</b> will be{" "}
-            <b>permanently deleted</b> once changes are saved.
-          </div>
-        )}
-        <Button
-          variant="outline-dark"
-          className="ms-auto"
-          onClick={() => onSave(entries, deletedEntries)}
+      <div className="my-5">
+        <Alert
+          show={showError}
+          variant="danger"
+          dismissible
+          onClose={() => setShowError(false)}
+          className="d-flex align-items-center mb-3"
         >
-          Save
-        </Button>
-      </Alert>
+          <BiErrorCircle /> &nbsp;&nbsp;&nbsp;{error}
+        </Alert>
+
+        <Alert
+          show={showAlert}
+          className="d-flex align-items-center mb-3"
+          variant="warning"
+        >
+          <AiFillSave /> &nbsp;&nbsp;&nbsp;You have unsaved changes.
+          {deletedEntries.length > 0 && (
+            <div>
+              <b>{deletedEntries.length} item(s)</b> will be{" "}
+              <b>permanently deleted</b> once changes are saved.
+            </div>
+          )}
+          <Button
+            variant="outline-dark"
+            className="ms-auto"
+            onClick={handleSave}
+          >
+            Save
+          </Button>
+        </Alert>
+      </div>
 
       <Table striped hover responsive bordered className="mb-4">
         <thead>

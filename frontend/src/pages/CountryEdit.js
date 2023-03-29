@@ -9,8 +9,6 @@ import { AuthContext } from "../components/AuthProvider";
 import Spinner from "../components/Spinner";
 import { cAxios, UserType } from "../constants";
 import EditableList, { flags } from "../components/EditableList";
-import { BiErrorCircle } from "react-icons/bi";
-import Alert from "react-bootstrap/Alert";
 
 export default function CountryEdit() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -21,21 +19,8 @@ export default function CountryEdit() {
   const [indicators, setIndicators] = useState();
   const [country, setCountry] = useState();
 
-  const [alert, setAlert] = useState({
-    message: "",
-    status: "",
-  });
-
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  const showError = useCallback((error) => {
-    setAlert({
-      status: "danger",
-      message: "Some error has occured, please try again in sometime!",
-    });
-    console.error(error);
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -89,10 +74,10 @@ export default function CountryEdit() {
         setFormattedData(_formattedData);
         setValues(dataByYears);
       } catch (error) {
-        showError(error);
+        console.error(error);
       }
     })();
-  }, [showError, searchParams]);
+  }, [searchParams]);
 
   useEffect(() => {
     if (user.type === UserType.MEMBER) {
@@ -125,6 +110,9 @@ export default function CountryEdit() {
 
         const row = values[entries[idx].year];
         const old = row ? row[prop] : undefined;
+
+        if (entries[idx][prop] && !isNumeric(entries[idx][prop])) 
+          throw new Error(`Failed to save changes. Received invalid input in row ${idx + 1} under column name ${prop}`);
 
         try {
           if (old === undefined && entries[idx][prop]) {
@@ -175,17 +163,17 @@ export default function CountryEdit() {
     // TODO: Should be possible to edit years as well
 
     window.location.reload();
+    return true;
   };
 
-  // const isNumeric = useCallback((str) => {
-  //   if (typeof str === "number") return true;
-
-  //   if (typeof str === "string")
-  //     return (
-  //       !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-  //       !isNaN(parseFloat(str))
-  //     ); // ...and ensure strings of whitespace fail
-  // }, []);
+  const isNumeric = useCallback((str) => {
+    if (typeof str === "number") return true;
+    if (typeof str === "string")
+      return (
+        !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+        !isNaN(parseFloat(str))
+      ); // ...and ensure strings of whitespace fail
+  }, []);
 
   if (!values || !countries || !indicators || !country) {
     return <Spinner />;
@@ -193,16 +181,6 @@ export default function CountryEdit() {
 
   return (
     <Container fluid className="px-3">
-      {alert.message && (
-        <Alert
-          variant="danger"
-          dismissible
-          onClose={() => setAlert({ message: "", status: "" })}
-          className="w-75 mx-auto"
-        >
-          <BiErrorCircle /> &nbsp;{alert.message}
-        </Alert>
-      )}
       <div className="my-5">
         <h4 className="mb-3 text-center">
           <MdOutlineFeaturedPlayList className="mb-2" />

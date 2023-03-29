@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import "./App.css";
 import Signup from "./pages/Signup";
 import Indicator from "./pages/Indicator";
+import Error from "./pages/Error";
 
 function App() {
   const { loading, setLoading, setUser } = useContext(AuthContext);
@@ -40,9 +41,21 @@ function App() {
         <Route element={<Public component={Login} />} path="/login" />
         <Route element={<Public component={Signup} />} path="/signup" />
         <Route element={<Private component={Country} />} path="/:id" />
-        <Route element={<Private component={CountryEdit} />} path="/values" />
+        <Route element={<Private component={CountryEdit} />} path="/values" errorElement={<Error />} />
         <Route element={<Private component={Dashboard} />} path="/dashboard" />
         <Route element={<Private component={Indicator} />} path="/indicators" />
+        <Route 
+          element={
+            <Error 
+              error={{
+                code: "404",
+                heading: "Page not found",
+                message: "The page you tried to acccess does not exist."
+              }}
+            />
+          } 
+          path="*" 
+        />
       </Routes>
     </BrowserRouter>
   );

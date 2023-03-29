@@ -8,7 +8,7 @@ export default function Error({ error }) {
   return (
     <div className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
       <Container>
-        <Row className="border border-dark rounded py-5 px-3 m-3">
+        <Row className="py-5 px-3 m-3">
           <Col xl={4}>
             <div className="d-flex align-items-center justify-content-end-lg px-4 mb-3" style= {{ minHeight: "100%" }}>
               <h1 className="display-1 mb-0">Error {error?.code}</h1>

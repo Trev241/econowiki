@@ -15,6 +15,8 @@ def get_countries():
 
 @app.route('/country/<iso_alpha_3_code>', methods=['GET'])
 def get_country(iso_alpha_3_code):
-    country = Country.query.filter_by(iso_alpha_3_code=iso_alpha_3_code.upper()).one()
-    
-    return country_schema.jsonify(country), 200 
+    try:
+        country = Country.query.filter_by(iso_alpha_3_code=iso_alpha_3_code.upper()).one()
+        return country_schema.jsonify(country), 200 
+    except:
+        return jsonify({'message': f'No such country with code {iso_alpha_3_code} exists.'}), 404

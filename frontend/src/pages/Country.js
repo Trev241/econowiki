@@ -26,6 +26,7 @@ import {
   Legend,
 } from "recharts";
 import { AuthContext } from "../components/AuthProvider";
+import ErrorModal from "../components/ErrorModal";
 
 const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
@@ -40,6 +41,8 @@ export default function Country() {
   const [formattedData, setFormattedData] = useState();
 
   const [isLoading, setLoading] = useState(true);
+  const [showError, setShowError] = useState(false);
+  const [error, setError] = useState('Something went wrong...');
 
   const geoRef = useRef(null);
   const params = useParams();
@@ -76,11 +79,16 @@ export default function Country() {
         );
 
         setFormattedData(finalData);
+        setLoading(false);
       } catch (err) {
         console.error(err);
+        setShowError(true);
+        setError({
+          status: `${err.response.status} (${err.response.statusText})`,
+          message: err.response.data.message
+        });
+        // navigate("/")
       }
-
-      setLoading(false);
     })();
   }, [params]);
 
@@ -113,7 +121,15 @@ export default function Country() {
   });
 
   return isLoading ? (
-    <Spinner />
+    <>
+      <Spinner />
+      <ErrorModal 
+          show={showError}
+          heading={`Error ${error.status}`}
+          message={error.message}
+          onHide={() => navigate("/")}
+      />
+    </>
   ) : (
     <>
       <Container>
