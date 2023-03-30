@@ -1,3 +1,5 @@
+import logging
+
 from app import app, db
 from flask import jsonify, request
 from middleware import isAuth
@@ -56,6 +58,7 @@ def get_values(iso_alpha_3_code):
                 else:
                     datasubset[year] = {'prediction' : prediction}
 
+    app.logger.info('Fetched values')
     return jsonify(data), 200
 
 @app.route('/value/add', methods=['POST'])

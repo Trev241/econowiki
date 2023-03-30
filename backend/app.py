@@ -1,4 +1,5 @@
 import os
+import logging
 
 from flask import Flask
 from flask_cors import CORS
@@ -6,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
 
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,6 +18,11 @@ cors = CORS(app, resources={
 }, supports_credentials=True)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+# Logging
+logger = logging.getLogger('werkzeug')
+handler = logging.FileHandler(f'{datetime.now().strftime("%Y-%m-%d")}.txt')
+logger.addHandler(handler)
 
 # Setting up SQLALCHEMY connection
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "db.sqlite")}'

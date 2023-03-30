@@ -169,7 +169,11 @@ export default function Country() {
                         (geo) => geo.id === params.id
                       );
                       geoRef.current = { geo, projection, path };
-                      return <Geography key={geo.rsmKey} geography={geo} />;
+                      return geo ? (
+                        <Geography key={geo.rsmKey} geography={geo} />
+                      ) : (
+                        <h1>No available map</h1>
+                      );
                     }}
                   </Geographies>
                 </ZoomableGroup>

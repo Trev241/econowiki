@@ -9,7 +9,7 @@ from models import (
 )
 
 @app.route('/prediction', methods=['POST'])
-@isAuth()
+# @isAuth()
 def fetch_predictions():
     iso_alpha_3_code = request.json.get('iso_alpha_3_code', None)
     indicator_short_name = request.json.get('indicator_short_name', None)
@@ -20,7 +20,8 @@ def fetch_predictions():
         indicator_id = EconomicIndicator.query.filter_by(short_name=indicator_short_name).one().id
         
         forecaster = Forecaster()
-        result = forecaster.predict(country_id, indicator_id, years)
+        result = forecaster.timeseries_predict(country_id, indicator_id, years)
+        # result = forecaster.predict(country_id, indicator_id, years)
 
         return jsonify(result), 200
     except NoResultFound:
