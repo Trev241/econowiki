@@ -75,6 +75,7 @@ export default function Country() {
             year: year,
             value: datasubset.data[year].value || null,
             prediction: datasubset.data[year].prediction || null,
+            axisValue: datasubset.data[year].value || datasubset.data[year].prediction
           }))
         );
 
@@ -213,7 +214,7 @@ export default function Country() {
               <LineChart data={dataset}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey={"year"} />
-                <YAxis dataKey={"value"} />
+                <YAxis dataKey={"axisValue"} />
                 <Legend verticalAlign="top" height={36} />
                 <Line
                   name="Actual"

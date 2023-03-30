@@ -80,7 +80,7 @@ export default function Signup() {
   );
 
   return (
-    <div className="d-flex align-items-center m-4">
+    <div className="d-flex align-items-center m-5">
       <Container>
         <Row className="justify-content-center">
           <Col lg={6}>
@@ -171,7 +171,7 @@ export default function Signup() {
                   {loading ? (
                     <Spinner animation="border" variant="light" size="sm" />
                   ) : (
-                    "SignUp"
+                    "Sign up"
                   )}
                 </Button>
               </Form>

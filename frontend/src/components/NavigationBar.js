@@ -46,12 +46,12 @@ export default function NavigationBar() {
           <Nav className="me-auto"></Nav>
           <Nav className="d-flex align-items-center">
             <Form.Select
-              className="bg-dark text-white h-25"
-              style={{
-                fontFamily: "monospace",
-                fontSize: "0.8rem",
-                marginRight: "1rem",
-              }}
+              className="bg-dark text-white h-25 me-2"
+              // style={{
+              //   fontFamily: "monospace",
+              //   fontSize: "0.8rem",
+              //   marginRight: "1rem",
+              // }}
               aria-label="Select a country"
               onChange={(e) => {
                 setCountry(
@@ -73,12 +73,11 @@ export default function NavigationBar() {
               ))}
             </Form.Select>
             {!user ? (
-              <>
+              <div className="d-flex align-items-center ms-3">
                 <Button
                   variant="outline-secondary"
                   onClick={() => navigate("/login")}
                   size="sm"
-                  style={{ marginLeft: "3rem" }}
                 >
                   Login
                 </Button>
@@ -86,11 +85,11 @@ export default function NavigationBar() {
                   variant="outline-secondary"
                   onClick={() => navigate("/signup")}
                   size="sm"
-                  className="m-2"
+                  className="ms-2"
                 >
-                  SignUp
+                  Register
                 </Button>
-              </>
+              </div>
             ) : (
               <>
                 <img
