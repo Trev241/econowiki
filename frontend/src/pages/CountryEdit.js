@@ -162,7 +162,6 @@ export default function CountryEdit() {
 
     // TODO: Should be possible to edit years as well
 
-    window.location.reload();
     return true;
   };
 

@@ -97,6 +97,9 @@ export default function EditableList({
     
     setShowError(!result);
     setShowAlert(!result);
+
+    if (result)
+      window.location.reload();
   }
 
   return (

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Container from "react-bootstrap/Container";
 import { AiOutlineLineChart } from "react-icons/ai";
 import EditableList from "../components/EditableList";
+import { cAxios } from "../constants";
 
 export default function Indicator() {
   const [indicators, setIndicators] = useState();
@@ -54,16 +55,15 @@ export default function Indicator() {
     // Commit deletions to database
     for (let index = 0; index < deletedEntries.length; index++) {
       try {
-        await fetch(`http://localhost:5001/indicator/${deletedEntries[index].id}`, {
-          method: "DELETE",
-          credentials: "include"
-        })
+        await cAxios.delete(`http://localhost:5001/indicator/${deletedEntries[index].id}`)
       } catch (err) {
+        if (err.response.status === 400) 
+          throw new Error(err.response.data.message);
         console.error(err);
       }
     }
 
-    window.location.reload();
+    return true;
   }
 
   return (

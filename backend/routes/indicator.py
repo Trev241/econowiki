@@ -50,8 +50,11 @@ def update_indicator(id):
 @app.route('/indicator/<id>', methods=['DELETE'])
 @isAuth()
 def delete_indicator(id):
-    indicator = EconomicIndicator.query.get(int(id))
-    db.session.delete(indicator)
-    db.session.commit()
+    try:
+        indicator = EconomicIndicator.query.get(int(id))
+        db.session.delete(indicator)
+        db.session.commit()
 
-    return eco_indicator_schema.jsonify(indicator), 200
+        return eco_indicator_schema.jsonify(indicator), 200
+    except:
+        return jsonify({'message': 'Failed to delete indicator. This could be because some values use it.'}), 400

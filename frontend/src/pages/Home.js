@@ -70,7 +70,7 @@ export default function Home() {
                       fill={SELECTED_GEO_FILL}
                       onClick={() => {
                         if (user) {
-                          navigate(`/${country.iso_alpha_3_code}`);
+                          window.location.href = (`/${country.iso_alpha_3_code}`);
                         }
                       }}
                       onMouseEnter={() => {

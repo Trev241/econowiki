@@ -192,19 +192,29 @@ export default function Country() {
             <div className="d-flex">
               <h1 className="display-6">{indicators[idx].name}</h1>
               {user.type !== UserType.MEMBER && (
-                <Button
-                  variant="outline-dark"
-                  className="ms-auto my-2"
-                  onClick={() =>
-                    navigate(
-                      `/values/?country=${country.iso_alpha_3_code}&indicator=${
-                        idx + 1
-                      }` || "/edit"
-                    )
-                  }
-                >
-                  <FiEdit2 />
-                </Button>
+                <>
+                  <Button
+                    variant="outline-dark"
+                    className="ms-auto my-2"
+                    onClick={() =>
+                      navigate(
+                        `/values/?country=${country.iso_alpha_3_code}&indicator=${
+                          idx + 1
+                        }` || "/edit"
+                      )
+                    }
+                  >
+                    <FiEdit2 /> Edit values
+                  </Button>
+
+                  <Button
+                    variant="outline-dark"
+                    className="ms-2 my-2"
+                    onClick={() => navigate("/indicators")}
+                  >
+                    <FiEdit2 /> Edit indicator
+                  </Button>
+                </>
               )}
             </div>
             <p className="lead mb-4">{indicators[idx].description}</p>
