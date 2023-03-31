@@ -161,3 +161,6 @@ cython_debug/
 
 # JupyterNotebook
 notebook.ipynb
+
+# Logs
+logs/

@@ -21,7 +21,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Logging
 logger = logging.getLogger('werkzeug')
-handler = logging.FileHandler(f'{datetime.now().strftime("%Y-%m-%d")}.txt')
+handler = logging.FileHandler(f'logs/{datetime.now().strftime("%Y-%m-%d")}.txt')
 logger.addHandler(handler)
 
 # Setting up SQLALCHEMY connection
