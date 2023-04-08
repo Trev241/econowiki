@@ -1,0 +1,5 @@
+.container-main {
+  min-height: 100vh;
+  background-size: cover;
+  background-image: url(../assets/globe2.jpg);
+}

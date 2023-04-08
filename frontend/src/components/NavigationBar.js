@@ -45,7 +45,7 @@ export default function NavigationBar() {
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto"></Nav>
           <Nav className="d-flex align-items-center">
-            <Form.Select
+            {/* <Form.Select
               className="bg-dark text-white h-25 me-2"
               // style={{
               //   fontFamily: "monospace",
@@ -71,7 +71,7 @@ export default function NavigationBar() {
                   {c.name}
                 </option>
               ))}
-            </Form.Select>
+            </Form.Select> */}
             {!user ? (
               <div className="d-flex align-items-center ms-3">
                 <Button

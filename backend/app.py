@@ -46,6 +46,7 @@ from routes.prediction import *
 from routes.user import *
 from routes.value import *
 from routes.log import *
+from routes.misc import *
 
 if __name__ == '__main__':
     # from models import Log
