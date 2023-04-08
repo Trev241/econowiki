@@ -42,13 +42,17 @@ export default function Home() {
     <Container fluid className="p-0">
       <div className="container-main d-flex align-items-center">
         <Container>
-          <h1 className="display-1">
-            <b>Economic data from all across the world at your fingertips.</b>
-          </h1>
+          <div className="text-slide-in">
+            <h1 className="display-1">
+              <b>
+                Economic data from all across the world at your fingertips.
+              </b>
+            </h1>
 
-          <h1 className="display-6 lead mb-5">
-            Absolutely free and community-driven.
-          </h1>
+            <h1 className="display-6 lead mb-5 text-slide-in">
+              Absolutely free and community-driven.
+            </h1>
+          </div>
           
           <Row>
             <Col md={6}>
@@ -56,8 +60,9 @@ export default function Home() {
                 <Form.Select 
                   className="me-2"
                   onChange={(e) => setSelectedCountry(e.target.value)}
+                  defaultValue="prompt"
                 >
-                  <option disabled selected>- Select a country -</option>
+                  <option disabled value="prompt">- Select a country -</option>
                   {countries && countries.map(country => (
                     <option value={country.iso_alpha_3_code}>{country.name}</option>
                   ))}
@@ -147,7 +152,7 @@ export default function Home() {
                     style={{
                       default: {
                         fillOpacity:
-                          country.iso_alpha_3_code === geo.id ? 0.75 : 0,
+                          country?.iso_alpha_3_code === geo.id ? 0.75 : 0,
                         outline: "none",
                       },
                       hover: {

@@ -3,3 +3,31 @@
   background-size: cover;
   background-image: url(../assets/globe2.jpg);
 }
+
+@keyframes slide-in {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.text-slide-in {
+  animation: slide-in 1.5s ease;
+}
+
+@keyframes slide-up {
+  0% {
+    clip-path: inset(100% 0 0 0);
+  }
+
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.text-slide-up {
+  animation: slide-up 1.5s ease;
+}
