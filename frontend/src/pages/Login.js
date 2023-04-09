@@ -8,7 +8,6 @@ import Row from "react-bootstrap/Row";
 import { Link, useNavigate } from "react-router-dom";
 import authService from "../services/AuthService";
 import Spinner from "react-bootstrap/Spinner";
-import { BiErrorCircle } from "react-icons/bi";
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 
 import { AuthContext } from "../components/AuthProvider";
@@ -93,16 +92,14 @@ export default function Login() {
                 <p className="lead">Sign in to your account</p>
               </div>
               
-              {serverError && (
-                <Alert
-                  className="mb-4"
-                  variant="danger"
-                  style={{ fontSize: "0.8rem" }}
-                >
-                  <BiErrorCircle /> &nbsp;{serverError}
-                </Alert>
-              )}
-              
+              <Alert
+                show={serverError}
+                className="mb-4"
+                variant="danger"
+              >
+                {serverError}
+              </Alert>
+            
               <FloatingLabel
                 controlId="floatingInput"
                 label="Username or email address"

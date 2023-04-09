@@ -7,7 +7,7 @@ from flask import jsonify, request, make_response
 from flask_jwt_extended import create_access_token
 from middleware import isAuth, isNotAuth
 from utils import sendMail
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from models import (
     UserType,
     User,
@@ -41,13 +41,15 @@ def login():
         if not bcrypt.checkpw(password.encode('utf-8'), user.password):
             raise Exception("Wrong credentials!")
         if not user.accepted:
-            raise Exception("Admin hasn't accepted your request yet, try again later!")
+            raise Exception("Your registration is still pending approval. Please try again later.")
 
         token = create_access_token(identity=user.id, expires_delta=False)
         response = make_response(jsonify(user_schema.jsonify(user).json), 200)
         response.set_cookie('token', token, 60 * 60 * 24 * 7)
         return response
         
+    except NoResultFound as e:
+        return jsonify({'message': 'No such user exists.'}), 400
     except Exception as e:
         print(e)
         return jsonify({'message': str(e)}), 401
@@ -63,9 +65,9 @@ def create_user():
     if len(username.strip()) == 0:
         errors['username'] = 'Username must not be empty!'
     if not re.fullmatch(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', email.strip()):
-        errors['email'] = 'Email must be an actual email!'
+        errors['email'] = 'The email given is invalid!'
     if len(password.strip()) < 8:
-        errors['password'] = 'Password length must be >= 8!'
+        errors['password'] = 'Password must contain at least 8 characters!'
     if json.dumps(errors) != "{}":
         return jsonify(errors), 400
 
@@ -91,7 +93,7 @@ def create_user():
             sendMail(admin.email, 'user registration alert!', body)
         return jsonify({'message': 'User registration success'}), 200
     except IntegrityError:
-        return jsonify({'message': 'An account with the given email or username already exists. Please login instead'}), 422
+        return jsonify({'message': 'An account with the given email or username already exists. Please login instead.'}), 422
 
 @app.route('/auth/logout', methods=['POST'])
 @isAuth()

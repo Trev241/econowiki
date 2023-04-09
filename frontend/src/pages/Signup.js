@@ -17,7 +17,6 @@ import { Link, useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const [errorMessage, setErrorMessage] = useState();
-  const [showFailedAlert, setShowFailedAlert] = useState(false);
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -42,6 +41,7 @@ export default function Signup() {
 
   const handleSubmit = useCallback(
     async (e) => {
+      setErrorMessage(undefined);
       e.preventDefault();
 
       const _errors = {};
@@ -76,8 +76,7 @@ export default function Signup() {
         })
         .catch(error => {
           console.error(error);
-          setErrorMessage(error.response.data.message);
-          setShowFailedAlert(true);
+          setErrorMessage(error.response?.data?.message || error.message);
         });
         setLoading(false);
       }
@@ -117,7 +116,11 @@ export default function Signup() {
                   <p className="lead">Create a new account</p>
                 </div>
 
-                <Alert show={showFailedAlert} className="mb-4" variant="danger">
+                <Alert 
+                  show={errorMessage !== undefined} 
+                  className="mb-4" 
+                  variant="danger"
+                >
                   {errorMessage}
                 </Alert>
 
