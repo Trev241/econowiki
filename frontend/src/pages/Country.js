@@ -1,17 +1,18 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  ComposableMap,
-  Geographies,
-  Geography,
-  ZoomableGroup,
-} from "react-simple-maps";
+// import {
+//   ComposableMap,
+//   Geographies,
+//   Geography,
+//   ZoomableGroup,
+// } from "react-simple-maps";
 import { FiEdit2 } from "react-icons/fi";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import Button from "react-bootstrap/Button";
+// import Button from "react-bootstrap/Button";
+import Dropdown from "react-bootstrap/Dropdown";
 
 import { cAxios, UserType } from "../constants";
 import Spinner from "../components/Spinner";
@@ -27,24 +28,26 @@ import {
 } from "recharts";
 import { AuthContext } from "../components/AuthProvider";
 import ErrorModal from "../components/ErrorModal";
+import Sidebar from "../components/Sidebar";
 
-const WORLD_GEO_URL =
-  "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
+// const WORLD_GEO_URL =
+//   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
 
 export default function Country() {
-  const [zoom, setZoom] = useState(1);
-  const [center, setCenter] = useState([0, 0]);
-  const [centered, setCentered] = useState();
+  // const [zoom, setZoom] = useState(1);
+  // const [center, setCenter] = useState([0, 0]);
+  // const [centered, setCentered] = useState();
 
   const [country, setCountry] = useState({});
   const [indicators, setIndicators] = useState([]);
   const [formattedData, setFormattedData] = useState();
+  const [recordCount, setRecordCount] = useState();
 
   const [isLoading, setLoading] = useState(true);
   const [showError, setShowError] = useState(false);
   const [error, setError] = useState('Something went wrong...');
 
-  const geoRef = useRef(null);
+  // const geoRef = useRef(null);
   const params = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
@@ -70,14 +73,20 @@ export default function Country() {
         const _values = response.data;
 
         // Reformat as list to be consumed by recharts
-        const finalData = Object.values(_values).map((datasubset) =>
-          Object.keys(datasubset.data).map((year) => ({
-            year: year,
-            value: datasubset.data[year].value || null,
-            prediction: datasubset.data[year].prediction || null,
-            axisValue: datasubset.data[year].value || datasubset.data[year].prediction
-          }))
+        const finalData = Object.keys(_values).map((indicator) => ({
+            indicator_id: _values[indicator].indicator_id,
+            data: Object.keys(_values[indicator].data).map((year) => ({
+              year: year,
+              value: _values[indicator].data[year].value || null,
+              prediction: _values[indicator].data[year].prediction || null,
+              axisValue: _values[indicator].data[year].value || _values[indicator].data[year].prediction
+            }))
+          })  
         );
+
+        let count = 0;
+        finalData.forEach(dataset => dataset.data.forEach(() => count++));
+        setRecordCount(count);
 
         setFormattedData(finalData);
         setLoading(false);
@@ -93,33 +102,33 @@ export default function Country() {
     })();
   }, [params]);
 
-  useEffect(() => {
-    if (geoRef.current && !centered) {
-      // const ratio = window.innerWidth / window.innerHeight
-      // const width = Math.min(window.innerHeight * ratio, window.innerWidth)
-      // const height = Math.min(window.innerWidth / ratio, window.innerHeight)
+  // useEffect(() => {
+  //   if (geoRef.current && !centered) {
+  //     // const ratio = window.innerWidth / window.innerHeight
+  //     // const width = Math.min(window.innerHeight * ratio, window.innerWidth)
+  //     // const height = Math.min(window.innerWidth / ratio, window.innerHeight)
 
-      const bounds = geoRef.current.path.bounds(geoRef.current.geo);
-      const boundsWidth = bounds[1][0] - bounds[0][0];
-      const boundsHeight = bounds[1][1] - bounds[0][1];
+  //     const bounds = geoRef.current.path.bounds(geoRef.current.geo);
+  //     const boundsWidth = bounds[1][0] - bounds[0][0];
+  //     const boundsHeight = bounds[1][1] - bounds[0][1];
 
-      const zoom =
-        0.25 /
-        Math.max(
-          boundsWidth / window.innerWidth,
-          boundsHeight / window.innerHeight
-        );
+  //     const zoom =
+  //       0.25 /
+  //       Math.max(
+  //         boundsWidth / window.innerWidth,
+  //         boundsHeight / window.innerHeight
+  //       );
 
-      // Adjust map to focus on selected country
-      setCenter(
-        geoRef.current.projection.invert(
-          geoRef.current.path.centroid(geoRef.current.geo)
-        )
-      );
-      setZoom(zoom);
-      setCentered(true);
-    }
-  });
+  //     // Adjust map to focus on selected country
+  //     setCenter(
+  //       geoRef.current.projection.invert(
+  //         geoRef.current.path.centroid(geoRef.current.geo)
+  //       )
+  //     );
+  //     setZoom(zoom);
+  //     setCentered(true);
+  //   }
+  // });
 
   return isLoading ? (
     <>
@@ -132,118 +141,127 @@ export default function Country() {
       />
     </>
   ) : (
-    <>
-      <Container>
-        <Row
-          className="text-center d-flex align-items-center justify-content-center"
-          style={{
-            margin: "5rem",
-          }}
-        >
-          <Col xs={4}>
-            <Container fluid>
-              <h1
-                className="display-6"
-                style={{
-                  textTransform: "uppercase",
-                  fontWeight: "bold",
-                }}
-              >
-                {country.name}
-              </h1>
-              <p className="lead">
-                ({country.iso_alpha_2_code}, {country.iso_alpha_3_code},{" "}
-                {country.un_code})
-              </p>
-            </Container>
-          </Col>
-          <Col xs={4}>
-            <Container fluid>
-              <ComposableMap
-                className="border border-secondary rounded"
-                projection="geoMercator"
-              >
-                <ZoomableGroup center={center} zoom={zoom}>
-                  <Geographies geography={WORLD_GEO_URL}>
-                    {({ geographies, projection, path }) => {
-                      const geo = geographies.find(
-                        (geo) => geo.id === params.id
-                      );
-                      geoRef.current = { geo, projection, path };
-                      return geo ? (
-                        <Geography key={geo.rsmKey} geography={geo} />
-                      ) : (
-                        <h1>No available map</h1>
-                      );
+    <Container fluid className="p-0">
+      <Row>
+        <Col sm={3}>
+          <Sidebar
+            items={indicators.reduce((a, v) => ({ ...a, [v.name]: v.short_name }), {})} 
+          />
+        </Col>
+
+        <Col sm={9}>
+          {/* <Container fluid>
+            <Row className="text-center d-flex align-items-center justify-content-center m-5">
+              <Col xs={4}>
+                <Container fluid>
+                  <h1
+                    className="display-6"
+                    style={{
+                      textTransform: "uppercase",
+                      fontWeight: "bold",
                     }}
-                  </Geographies>
-                </ZoomableGroup>
-              </ComposableMap>
-            </Container>
-          </Col>
-        </Row>
-      </Container>
-
-      {/* <CountryInfo country={country} info={info} indicators={indicators} predictions={predictions} modData={formattedData} /> */}
-
-      <Container className="my-5">
-        {formattedData.map((dataset, idx) => (
-          <Row key={idx} className="mb-5">
-            <div className="d-flex">
-              <h1 className="display-6">{indicators[idx].name}</h1>
-              {user.type !== UserType.MEMBER && (
-                <>
-                  <Button
-                    variant="outline-dark"
-                    className="ms-auto my-2"
-                    onClick={() =>
-                      navigate(
-                        `/values/?country=${country.iso_alpha_3_code}&indicator=${
-                          idx + 1
-                        }` || "/edit"
-                      )
-                    }
                   >
-                    <FiEdit2 /> Edit values
-                  </Button>
-
-                  <Button
-                    variant="outline-dark"
-                    className="ms-2 my-2"
-                    onClick={() => navigate("/indicators")}
+                    {country.name}
+                  </h1>
+                  <p className="lead">
+                    ({country.iso_alpha_2_code}, {country.iso_alpha_3_code},{" "}
+                    {country.un_code})
+                  </p>
+                </Container>
+              </Col>
+              <Col xs={4}>
+                <Container fluid>
+                  <ComposableMap
+                    className="border border-secondary rounded"
+                    projection="geoMercator"
                   >
-                    <FiEdit2 /> Edit indicator
-                  </Button>
-                </>
-              )}
+                    <ZoomableGroup center={center} zoom={zoom}>
+                      <Geographies geography={WORLD_GEO_URL}>
+                        {({ geographies, projection, path }) => {
+                          const geo = geographies.find(
+                            (geo) => geo.id === params.id
+                          );
+                          geoRef.current = { geo, projection, path };
+                          return geo ? (
+                            <Geography key={geo.rsmKey} geography={geo} />
+                          ) : (
+                            <h1>No available map</h1>
+                          );
+                        }}
+                      </Geographies>
+                    </ZoomableGroup>
+                  </ComposableMap>
+                </Container>
+              </Col>
+            </Row>
+          </Container> */}
+
+
+          <Container fluid className="my-5">
+            <div className="mb-5">
+              <h1>{country.name}</h1>
+              <div>
+                <b>Codes</b>: {country.iso_alpha_2_code}/{country.iso_alpha_3_code}/{country.un_code}
+              </div>
+              <div>
+                <b>Records</b>: {recordCount || "N/A"} (including projected values)
+              </div>
             </div>
-            <p className="lead mb-4">{indicators[idx].description}</p>
+            {formattedData.map((dataset) => {
+              let indicator = indicators.find(indicator => indicator.id === dataset.indicator_id);
+              return (
+                <Row id={indicator.short_name} key={indicator.id} className="mb-5">
+                  <div className="d-flex">
+                    <h2>{indicator.name}</h2>
+                    {user.type !== UserType.MEMBER && (
+                      <Dropdown className="ms-auto">
+                        <Dropdown.Toggle variant="outline-dark">
+                          <FiEdit2 />&nbsp;&nbsp;&nbsp;Edit
+                        </Dropdown.Toggle>
 
-            {/* TODO: YAxis datakey should be set to the highest number (either value or prediction) to avoid lines from going outside the charts */}
-            <ResponsiveContainer aspect={3 / 1}>
-              <LineChart data={dataset}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey={"year"} />
-                <YAxis dataKey={"axisValue"} />
-                <Legend verticalAlign="top" height={36} />
-                <Line
-                  name="Actual"
-                  type={"monotone"}
-                  dataKey="value"
-                  stroke="#222222"
-                />
-                <Line
-                  name="Projected"
-                  type={"monotone"}
-                  dataKey="prediction"
-                  stroke="#0000FF"
-                />
-                <Tooltip />
-              </LineChart>
-            </ResponsiveContainer>
-          </Row>
-        ))}
-      </Container>
-    </>
+                        <Dropdown.Menu>
+                          <Dropdown.Item 
+                            onClick={() => navigate(`/values/?country=${country.iso_alpha_3_code}&indicator=${indicator.id}`)}
+                          >
+                            Values
+                          </Dropdown.Item>
+                          <Dropdown.Item onClick={() => navigate("/indicators")}>
+                            Indicator
+                          </Dropdown.Item>
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    )}
+                  </div>
+                  <p className="lead mb-4">{indicator.description}</p>
+                  
+                  <div className="px-2">
+                    <ResponsiveContainer aspect={3 / 1}>
+                      <LineChart data={dataset.data}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey={"year"} />
+                        <YAxis dataKey={"axisValue"} />
+                        <Legend verticalAlign="top" height={36} />
+                        <Line
+                          name="Actual"
+                          type={"monotone"}
+                          dataKey="value"
+                          stroke="#222222"
+                        />
+                        <Line
+                          name="Projected"
+                          type={"monotone"}
+                          dataKey="prediction"
+                          stroke="#0000FF"
+                        />
+                        <Tooltip />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Row>
+            )})}
+          </Container>
+        </Col>
+      </Row>
+    </Container>
   );
 }

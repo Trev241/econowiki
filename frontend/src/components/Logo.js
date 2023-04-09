@@ -11,7 +11,8 @@ export default function Logo({ color, styles = {} }) {
           fontFamily: "monospace",
         }}
       >
-        <GiWorld size={"50px"} /> World Income
+        <GiWorld size={"50px"} />&nbsp;
+        <span style={{ fontSize: "1.25em" }}>World Income</span>
       </Link>
     </div>
   );

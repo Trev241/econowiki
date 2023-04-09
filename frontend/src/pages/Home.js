@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
-import { TbCurrentLocation } from "react-icons/tb";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
