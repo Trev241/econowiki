@@ -23,10 +23,10 @@ cors = CORS(
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Logging
-logger = logging.getLogger('werkzeug')
-Path("logs/").mkdir(parents=True, exist_ok=True)
-handler = logging.FileHandler(f'logs/{datetime.now().strftime("%Y-%m-%d")}.txt')
-logger.addHandler(handler)
+# logger = logging.getLogger('werkzeug')
+# Path("logs/").mkdir(parents=True, exist_ok=True)
+# handler = logging.FileHandler(f'logs/{datetime.now().strftime("%Y-%m-%d")}.txt')
+# logger.addHandler(handler)
 
 # Setting up SQLALCHEMY connection
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "db.sqlite")}'
