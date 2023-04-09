@@ -9,18 +9,22 @@ from flask_jwt_extended import JWTManager
 
 from datetime import datetime
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
 app = Flask(__name__)
-cors = CORS(app, resources={
-    r'*': { 'origins': 'http://localhost:3000' },
-}, supports_credentials=True)
+cors = CORS(
+    app, 
+    resources={r'*': { 'origins': '*' },}, 
+    supports_credentials=True
+)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Logging
 logger = logging.getLogger('werkzeug')
+Path("logs/").mkdir(parents=True, exist_ok=True)
 handler = logging.FileHandler(f'logs/{datetime.now().strftime("%Y-%m-%d")}.txt')
 logger.addHandler(handler)
 
