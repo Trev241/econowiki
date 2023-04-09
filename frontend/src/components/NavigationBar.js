@@ -33,7 +33,7 @@ export default function NavigationBar() {
       expand="lg"
       bg="dark"
       variant="dark"
-      className="py-4 px-2"
+      className="py-4 px-5"
     >
       <Logo color={"white"} />
       <Navbar.Toggle aria-controls="responsive-navbar-nav" />

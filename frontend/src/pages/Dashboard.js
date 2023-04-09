@@ -232,45 +232,53 @@ export default function Dashboard() {
 
   return (
     <Container className="mb-5">
-      <Row className="mt-5 mb-5 text-center">
-        <p style={{ fontSize: "1.5rem" }}>
-          <GrUserAdmin /> &nbsp;DASHBOARD
-        </p>
+      <Row className="mt-5">
+        <div className="d-flex">
+          <GrUserAdmin className="display-5" />&nbsp;&nbsp;
+          <h1>Dashboard</h1>
+        </div>
+        <p className="lead">Hello, {user.username}</p>
       </Row>
       <Row>
-        <Col xl={8}>
-          <Accordion defaultActiveKey="0" className="mb-4">
-            <Accordion.Item eventKey="0">
-              <Accordion.Header>
-                <MdPendingActions /> &nbsp;Pending
-              </Accordion.Header>
-              <Accordion.Body>
-                {pending.map((u) => (
-                  <Item
-                    key={u.id}
-                    user={u}
-                    isPending={true}
-                    confirmUser={confirmUser}
-                  />
-                ))}
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
-        </Col>
-        <Col sm>
-          <Accordion defaultActiveKey={"0"} className="mb-4">
-            <Accordion.Item eventKey="0">
-              <Accordion.Header>
-                <BiBookAlt /> &nbsp;Logs
-              </Accordion.Header>
-              <Accordion.Body>
-                {logs.map((l) => (
-                  <Log key={l.id} log={l} />
-                ))}
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
-        </Col>
+        <Accordion defaultActiveKey="0" className="mb-4">
+          <Accordion.Item eventKey="0">
+            <Accordion.Header>
+              <MdPendingActions /> &nbsp;Pending
+            </Accordion.Header>
+            <Accordion.Body>
+              {(pending.length > 0) ? (pending.map((u) => (
+                <Item
+                  key={u.id}
+                  user={u}
+                  isPending={true}
+                  confirmUser={confirmUser}
+                />
+              ))) : (
+                <div className="text-center">
+                  No registrations pending approval.
+                </div>
+              )}
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
+      </Row>
+      <Row>
+        <Accordion defaultActiveKey={"0"} className="mb-4">
+          <Accordion.Item eventKey="0">
+            <Accordion.Header>
+              <BiBookAlt /> &nbsp;Logs
+            </Accordion.Header>
+            <Accordion.Body>
+              {(logs.length > 0) ? (logs.map((l) => (
+                <Log key={l.id} log={l} />
+              ))) : (
+                <div className="text-center">
+                  No logs to view.
+                </div>
+              )}
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
       </Row>
       <Row>
         <Accordion className="mb-4" defaultActiveKey={"0"}>
