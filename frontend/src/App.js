@@ -47,11 +47,9 @@ function App() {
         <Route 
           element={
             <Error 
-              error={{
-                code: "404",
-                heading: "Page not found",
-                message: "The page you tried to acccess does not exist."
-              }}
+              code="404"
+              heading="PAGE NOT FOUND"
+              message="The page you tried to acccess does not exist."
             />
           } 
           path="*" 

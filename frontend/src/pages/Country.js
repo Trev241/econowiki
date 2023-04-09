@@ -27,8 +27,8 @@ import {
   Legend,
 } from "recharts";
 import { AuthContext } from "../components/AuthProvider";
-import ErrorModal from "../components/ErrorModal";
 import Sidebar from "../components/Sidebar";
+import Error from "./Error";
 
 // const WORLD_GEO_URL =
 //   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
@@ -44,8 +44,7 @@ export default function Country() {
   const [recordCount, setRecordCount] = useState();
 
   const [isLoading, setLoading] = useState(true);
-  const [showError, setShowError] = useState(false);
-  const [error, setError] = useState('Something went wrong...');
+  const [error, setError] = useState();
 
   // const geoRef = useRef(null);
   const params = useParams();
@@ -92,9 +91,9 @@ export default function Country() {
         setLoading(false);
       } catch (err) {
         console.error(err);
-        setShowError(true);
         setError({
-          status: `${err.response.status} (${err.response.statusText})`,
+          status: err.response.status,
+          statusText: err.response.statusText,
           message: err.response.data.message
         });
         // navigate("/")
@@ -131,15 +130,15 @@ export default function Country() {
   // });
 
   return isLoading ? (
-    <>
+    !error ? (
       <Spinner />
-      <ErrorModal 
-          show={showError}
-          heading={`Error ${error.status}`}
-          message={error.message}
-          onHide={() => navigate("/")}
+      ) : (
+      <Error
+        code={error.status}
+        heading={error.statusText}
+        message={error.message}
       />
-    </>
+    )
   ) : (
     <Container fluid className="p-0">
       <Row>

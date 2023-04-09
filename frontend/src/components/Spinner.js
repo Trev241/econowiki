@@ -1,15 +1,10 @@
 export default function Spinner() {
   return (
     <div
-      className="spinner-border"
+      className="spinner-border p-5 centered"
       role="status"
-      style={{
-        position: "absolute",
-        bottom: "50%",
-        left: "50%",
-      }}
     >
-      <span className="visually-hidden">Loading...</span>
+        <span className="visually-hidden">Loading...</span>
     </div>
   );
 }

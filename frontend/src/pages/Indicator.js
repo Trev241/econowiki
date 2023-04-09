@@ -69,11 +69,14 @@ export default function Indicator() {
   return (
     indicators && (
       <Container fluid className="my-5 px-3">
-        <h1 className="mb-3">
-          <AiOutlineLineChart className="mb-2" />
-          &nbsp;Economic Indicators
-        </h1>
-        <p className="lead mb-5">A comprehensive list of all economic indicators used on this site accompanied by a short description.</p>
+        <div className="d-flex">
+          <AiOutlineLineChart className="display-5" />&nbsp;&nbsp;
+          <h1>Economic Indicators</h1>
+        </div>
+        <p className="lead mb-5">
+          A comprehensive list of all economic indicators used on this site accompanied by a short description.
+          All countries are measured using these very indicators.
+        </p>
 
         <EditableList 
           data={indicators} 

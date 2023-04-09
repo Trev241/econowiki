@@ -3,7 +3,7 @@ import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
-import { MdOutlineFeaturedPlayList } from "react-icons/md";
+import { MdFormatListNumbered } from "react-icons/md";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
 import Spinner from "../components/Spinner";
@@ -18,6 +18,7 @@ export default function CountryEdit() {
   const [countries, setCountries] = useState();
   const [indicators, setIndicators] = useState();
   const [country, setCountry] = useState();
+  const [loading, setLoading] = useState(true);
 
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export default function CountryEdit() {
   useEffect(() => {
     (async () => {
       try {
+        setLoading(true);
         let response;
 
         // Save indicator data and map them to their ID
@@ -76,6 +78,8 @@ export default function CountryEdit() {
       } catch (error) {
         console.error(error);
       }
+
+      setLoading(false);
     })();
   }, [searchParams]);
 
@@ -181,16 +185,18 @@ export default function CountryEdit() {
   return (
     <Container fluid className="px-3">
       <div className="my-5">
-        <h4 className="mb-3 text-center">
-          <MdOutlineFeaturedPlayList className="mb-2" />
-          &nbsp;Values
-        </h4>
+        <div className="d-flex">
+          <MdFormatListNumbered className="display-5" />&nbsp;&nbsp;
+          <h1>Values</h1>
+        </div>
+        <p className="lead">A list of all the values of every country recorded under each indicator.</p>
+
         <Form.Group
           as={Row}
           className="mb-3 d-flex flex-column"
           controlId="country"
         >
-          <Col sm={6} className="mx-auto">
+          <Col sm={6} className="">
             <Form.Select
               value={searchParams.get("country")}
               onChange={updateCountryFilter}
@@ -208,22 +214,26 @@ export default function CountryEdit() {
           </Col>
         </Form.Group>
       </div>
-
-      <EditableList
-        data={formattedData}
-        setData={setFormattedData}
-        defaultEntry={{
-          year: "",
-          ...Object.values(indicators)
-            .map((indicator) => indicator.short_name)
-            .reduce((a, v) => ({ ...a, [v]: "" }), {}),
-        }}
-        entryPropNames={[
-          "Year",
-          ...Object.keys(indicators).map((id) => indicators[id].short_name),
-        ]}
-        onSave={handleSave}
-      />
+      
+      {!loading ? ( 
+        <EditableList
+          data={formattedData}
+          setData={setFormattedData}
+          defaultEntry={{
+            year: "",
+            ...Object.values(indicators)
+              .map((indicator) => indicator.short_name)
+              .reduce((a, v) => ({ ...a, [v]: "" }), {}),
+          }}
+          entryPropNames={[
+            "Year",
+            ...Object.keys(indicators).map((id) => indicators[id].short_name),
+          ]}
+          onSave={handleSave}
+        />
+      ) : (
+        <Spinner />
+      )}
     </Container>
   );
 }

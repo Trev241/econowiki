@@ -14,6 +14,7 @@ import { BiWorld } from "react-icons/bi";
 import { AiOutlineLineChart } from "react-icons/ai";
 import { FaUsers } from "react-icons/fa";
 import { cAxios } from "../constants";
+import { useNavigate } from "react-router-dom";
 
 const WORLD_GEO_URL =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
@@ -24,6 +25,8 @@ export default function Home() {
 
   const [selectedCountry, setSelectedCountry] = useState();
   const [stats, setStats] = useState();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -66,7 +69,7 @@ export default function Home() {
                   ))}
                 </Form.Select>
                 <Button
-                  onClick={() => window.location.href = `/${selectedCountry}`}
+                  onClick={() => navigate(`/${selectedCountry}`)}
                   disabled={!selectedCountry}
                 >
                   <MdSearch />
@@ -164,7 +167,7 @@ export default function Home() {
                     fill={SELECTED_GEO_FILL}
                     onClick={() => {
                       if (user) {
-                        window.location.href = (`/${country.iso_alpha_3_code}`);
+                        navigate(`/${country.iso_alpha_3_code}`);
                       }
                     }}
                     onMouseEnter={() => {
