@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 //   ZoomableGroup,
 // } from "react-simple-maps";
 import { FiEdit2 } from "react-icons/fi";
+import { BsCircle } from "react-icons/bs";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -73,18 +74,19 @@ export default function Country() {
 
         // Reformat as list to be consumed by recharts
         const finalData = Object.keys(_values).map((indicator) => ({
-            indicator_id: _values[indicator].indicator_id,
-            data: Object.keys(_values[indicator].data).map((year) => ({
-              year: year,
-              value: _values[indicator].data[year].value || null,
-              prediction: _values[indicator].data[year].prediction || null,
-              axisValue: _values[indicator].data[year].value || _values[indicator].data[year].prediction
-            }))
-          })  
-        );
+          indicator_id: _values[indicator].indicator_id,
+          data: Object.keys(_values[indicator].data).map((year) => ({
+            year: year,
+            value: _values[indicator].data[year].value || null,
+            prediction: _values[indicator].data[year].prediction || null,
+            axisValue:
+              _values[indicator].data[year].value ||
+              _values[indicator].data[year].prediction,
+          })),
+        }));
 
         let count = 0;
-        finalData.forEach(dataset => dataset.data.forEach(() => count++));
+        finalData.forEach((dataset) => dataset.data.forEach(() => count++));
         setRecordCount(count);
 
         setFormattedData(finalData);
@@ -94,7 +96,7 @@ export default function Country() {
         setError({
           status: err.response.status,
           statusText: err.response.statusText,
-          message: err.response.data.message
+          message: err.response.data.message,
         });
         // navigate("/")
       }
@@ -132,7 +134,7 @@ export default function Country() {
   return isLoading ? (
     !error ? (
       <Spinner />
-      ) : (
+    ) : (
       <Error
         code={error.status}
         heading={error.statusText}
@@ -144,11 +146,14 @@ export default function Country() {
       <Row>
         <Col sm={3}>
           <Sidebar
-            items={indicators.reduce((a, v) => ({ ...a, [v.name]: v.short_name }), {})} 
+            items={indicators.reduce(
+              (a, v) => ({ ...a, [v.name]: v.short_name }),
+              {}
+            )}
           />
         </Col>
 
-        <Col sm={9}>
+        <Col sm={8}>
           {/* <Container fluid>
             <Row className="text-center d-flex align-items-center justify-content-center m-5">
               <Col xs={4}>
@@ -195,36 +200,56 @@ export default function Country() {
             </Row>
           </Container> */}
 
-
           <Container fluid className="my-5">
             <div className="mb-5">
               <h1>{country.name}</h1>
               <div>
-                <b>Codes</b>: {country.iso_alpha_2_code}/{country.iso_alpha_3_code}/{country.un_code}
+                <b>Codes</b>: {country.iso_alpha_2_code}/
+                {country.iso_alpha_3_code}/{country.un_code}
               </div>
               <div>
-                <b>Records</b>: {recordCount || "N/A"} (including projected values)
+                <b>Records</b>: {recordCount || "N/A"} (including projected
+                values)
               </div>
             </div>
             {formattedData.map((dataset) => {
-              let indicator = indicators.find(indicator => indicator.id === dataset.indicator_id);
+              let indicator = indicators.find(
+                (indicator) => indicator.id === dataset.indicator_id
+              );
               return (
-                <Row id={indicator.short_name} key={indicator.id} className="mb-5">
+                <Row
+                  id={indicator.short_name}
+                  key={indicator.id}
+                  className="mb-5"
+                >
                   <div className="d-flex">
                     <h2>{indicator.name}</h2>
                     {user.type !== UserType.MEMBER && (
                       <Dropdown className="ms-auto">
                         <Dropdown.Toggle variant="outline-dark">
-                          <FiEdit2 />&nbsp;&nbsp;&nbsp;Edit
+                          <FiEdit2 />
+                          &nbsp;&nbsp;&nbsp;Edit
                         </Dropdown.Toggle>
 
                         <Dropdown.Menu>
-                          <Dropdown.Item 
-                            onClick={() => navigate(`/values/?country=${country.iso_alpha_3_code}&indicator=${indicator.id}`)}
+                          <Dropdown.Item
+                            onClick={() =>
+                              navigate(
+                                `/values/?country=${country.iso_alpha_3_code}&indicator=${indicator.id}`
+                              )
+                            }
                           >
+                            <BsCircle
+                              style={{ fontSize: "0.5rem", marginRight: "5px" }}
+                            />{" "}
                             Values
                           </Dropdown.Item>
-                          <Dropdown.Item onClick={() => navigate("/indicators")}>
+                          <Dropdown.Item
+                            onClick={() => navigate("/indicators")}
+                          >
+                            <BsCircle
+                              style={{ fontSize: "0.5rem", marginRight: "5px" }}
+                            />{" "}
                             Indicator
                           </Dropdown.Item>
                         </Dropdown.Menu>
@@ -232,7 +257,7 @@ export default function Country() {
                     )}
                   </div>
                   <p className="lead mb-4">{indicator.description}</p>
-                  
+
                   <div className="px-2">
                     <ResponsiveContainer aspect={3 / 1}>
                       <LineChart data={dataset.data}>
@@ -257,7 +282,8 @@ export default function Country() {
                     </ResponsiveContainer>
                   </div>
                 </Row>
-            )})}
+              );
+            })}
           </Container>
         </Col>
       </Row>

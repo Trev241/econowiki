@@ -8,7 +8,13 @@ import Button from "react-bootstrap/Button";
 
 import { AuthContext } from "../components/AuthProvider";
 import "./Home.css";
-import { MdCheck, MdFormatListNumbered, MdMoneyOff, MdPeople, MdSearch } from "react-icons/md";
+import {
+  MdCheck,
+  MdFormatListNumbered,
+  MdMoneyOff,
+  MdPeople,
+  MdSearch,
+} from "react-icons/md";
 import { SlGraph } from "react-icons/sl";
 import { BiWorld } from "react-icons/bi";
 import { AiOutlineLineChart } from "react-icons/ai";
@@ -37,7 +43,7 @@ export default function Home() {
         console.error(err);
       }
     })();
-  }, [])
+  }, []);
 
   return (
     <Container fluid className="p-0">
@@ -45,28 +51,31 @@ export default function Home() {
         <Container>
           <div className="text-slide-in">
             <h1 className="display-1">
-              <b>
-                Economic data from all across the world at your fingertips.
-              </b>
+              <b>Economic data from all across the world at your fingertips.</b>
             </h1>
 
             <h1 className="display-6 lead mb-5 text-slide-in">
               Absolutely free and community-driven.
             </h1>
           </div>
-          
+
           <Row>
             <Col md={6}>
               <div className="d-flex">
-                <Form.Select 
+                <Form.Select
                   className="me-2"
                   onChange={(e) => setSelectedCountry(e.target.value)}
                   defaultValue="prompt"
                 >
-                  <option disabled value="prompt">- Select a country -</option>
-                  {countries && countries.map(country => (
-                    <option value={country.iso_alpha_3_code}>{country.name}</option>
-                  ))}
+                  <option disabled value="prompt">
+                    - Select a country -
+                  </option>
+                  {countries &&
+                    countries.map((country) => (
+                      <option value={country.iso_alpha_3_code}>
+                        {country.name}
+                      </option>
+                    ))}
                 </Form.Select>
                 <Button
                   onClick={() => navigate(`/${selectedCountry}`)}
@@ -80,14 +89,14 @@ export default function Home() {
         </Container>
       </div>
 
-      <hr className="mt-0 mb-5 p-0" />
-
       <Container className="mb-5">
         <Row className="text-center">
           <Col md className="my-4">
             <MdMoneyOff className="display-1 mb-3" />
             <h3>Free</h3>
-            <p>Look up data at <b>zero</b> the cost</p>
+            <p>
+              Look up data at <b>zero</b> cost
+            </p>
           </Col>
           <Col md className="my-4">
             <MdCheck className="display-1 mb-3" />
@@ -106,8 +115,6 @@ export default function Home() {
           </Col>
         </Row>
       </Container>
-
-      <hr className="mb-5" />
 
       <Row className="mx-2 mb-5">
         {/* {country.iso_alpha_3_code && (
@@ -136,11 +143,12 @@ export default function Home() {
         <div className="text-center mb-3">
           <h1>{country?.name || "Select a country"}</h1>
           <div className="mb-2">
-            <b>ISO Codes</b>: {country?.iso_alpha_2_code || "-"}/{country?.iso_alpha_3_code || "-"}
+            <b>ISO Codes</b>: {country?.iso_alpha_2_code || "-"}/
+            {country?.iso_alpha_3_code || "-"}
           </div>
         </div>
 
-        <Col className="border border-dark rounded">
+        <Col>
           <ComposableMap>
             <Geographies geography={WORLD_GEO_URL}>
               {({ geographies }) =>
@@ -183,14 +191,16 @@ export default function Home() {
         </Col>
       </Row>
 
-      {stats && 
+      {stats && (
         <Container className="mb-5 text-center">
           <Row>
             <Col md className="my-4">
               <div className="d-flex align-items-center justify-content-center">
                 <BiWorld className="display-1 me-2 " />
                 <div className="text-start w-25">
-                  <h1 className="mb-0">{stats.country_count}</h1>
+                  <h1 className="mb-0">
+                    {stats.country_count.toLocaleString()}
+                  </h1>
                   <p className="mb-0">countries</p>
                 </div>
               </div>
@@ -199,7 +209,7 @@ export default function Home() {
               <div className="d-flex align-items-center justify-content-center">
                 <MdFormatListNumbered className="display-1 me-2" />
                 <div className="text-start w-25">
-                  <h1 className="mb-0">{stats.value_count}</h1>
+                  <h1 className="mb-0">{stats.value_count.toLocaleString()}</h1>
                   <p className="mb-0">values</p>
                 </div>
               </div>
@@ -224,7 +234,7 @@ export default function Home() {
             </Col>
           </Row>
         </Container>
-      }
-      </Container>
+      )}
+    </Container>
   );
 }
