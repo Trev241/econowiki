@@ -55,10 +55,10 @@ export default function CountryEdit() {
             // Create object if encountering current year for the first time
             if (!dataByYears[year]) dataByYears[year] = {};
 
-            // Assign value and record id 
+            // Assign value and record id
             dataByYears[year][indicator] = {
               id: entries[year].value_id,
-              value: entries[year].value
+              value: entries[year].value,
             };
           });
         });
@@ -109,14 +109,18 @@ export default function CountryEdit() {
       );
 
       for (const prop of props) {
-        let api_endpoint = "http://localhost:5001/value/";
+        let api_endpoint = "/value/";
         let method;
 
         const row = values[entries[idx].year];
         const old = row ? row[prop] : undefined;
 
-        if (entries[idx][prop] && !isNumeric(entries[idx][prop])) 
-          throw new Error(`Failed to save changes. Received invalid input in row ${idx + 1} under column name ${prop}`);
+        if (entries[idx][prop] && !isNumeric(entries[idx][prop]))
+          throw new Error(
+            `Failed to save changes. Received invalid input in row ${
+              idx + 1
+            } under column name ${prop}`
+          );
 
         try {
           if (old === undefined && entries[idx][prop]) {
@@ -133,19 +137,20 @@ export default function CountryEdit() {
             method = "PUT";
           } else continue;
 
-          await fetch(api_endpoint, {
-            method: method,
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              country_id: country.id,
-              indicator_id: Object.values(indicators).find(
-                (indicator) => indicator.short_name === prop
-              )?.id,
-              year: entries[idx].year,
-              value: entries[idx][prop],
-            }),
-          });
+          const body = {
+            country_id: country.id,
+            indicator_id: Object.values(indicators).find(
+              (indicator) => indicator.short_name === prop
+            )?.id,
+            year: entries[idx].year,
+            value: entries[idx][prop],
+          };
+
+          await (method === "POST"
+            ? cAxios.post(api_endpoint, body)
+            : method === "DELETE"
+            ? cAxios.delete(api_endpoint, body)
+            : cAxios.put(api_endpoint, body));
         } catch (err) {
           console.error(err);
         }
@@ -156,10 +161,7 @@ export default function CountryEdit() {
     for (const deletedEntry of deletedEntries)
       for (const old of Object.values(values[deletedEntry.year]))
         try {
-          await fetch(`http://localhost:5001/value/${old.id}`, {
-            method: "DELETE",
-            credentials: "include",
-          });
+          await cAxios.delete(`/value/${old.id}`);
         } catch (err) {
           console.error(err);
         }
@@ -186,10 +188,14 @@ export default function CountryEdit() {
     <Container fluid className="px-3">
       <div className="my-5">
         <div className="d-flex">
-          <MdFormatListNumbered className="display-5" />&nbsp;&nbsp;
+          <MdFormatListNumbered className="display-5" />
+          &nbsp;&nbsp;
           <h1>Values</h1>
         </div>
-        <p className="lead">A list of all the values of every country recorded under each indicator.</p>
+        <p className="lead">
+          A list of all the values of every country recorded under each
+          indicator.
+        </p>
 
         <Form.Group
           as={Row}
@@ -214,8 +220,8 @@ export default function CountryEdit() {
           </Col>
         </Form.Group>
       </div>
-      
-      {!loading ? ( 
+
+      {!loading ? (
         <EditableList
           data={formattedData}
           setData={setFormattedData}

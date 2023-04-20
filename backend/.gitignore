@@ -164,3 +164,4 @@ notebook.ipynb
 
 # Logs
 logs/
+.vercel

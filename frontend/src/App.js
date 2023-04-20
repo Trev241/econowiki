@@ -41,18 +41,22 @@ function App() {
         <Route element={<Public component={Login} />} path="/login" />
         <Route element={<Public component={Signup} />} path="/signup" />
         <Route element={<Private component={Country} />} path="/:id" />
-        <Route element={<Private component={CountryEdit} />} path="/values" errorElement={<Error />} />
+        <Route
+          element={<Private component={CountryEdit} />}
+          path="/values"
+          errorElement={<Error />}
+        />
         <Route element={<Private component={Dashboard} />} path="/dashboard" />
         <Route element={<Private component={Indicator} />} path="/indicators" />
-        <Route 
+        <Route
           element={
-            <Error 
+            <Error
               code="404"
               heading="PAGE NOT FOUND"
               message="The page you tried to acccess does not exist."
             />
-          } 
-          path="*" 
+          }
+          path="*"
         />
       </Routes>
     </BrowserRouter>
