@@ -72,7 +72,7 @@ export default function Home() {
                   </option>
                   {countries &&
                     countries.map((country) => (
-                      <option value={country.iso_alpha_3_code}>
+                      <option key={country.iso_alpha_3_code} value={country.iso_alpha_3_code}>
                         {country.name}
                       </option>
                     ))}
