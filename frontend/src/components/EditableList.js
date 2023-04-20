@@ -190,7 +190,7 @@ export default function EditableList({
                         entry.editable ? "outline-success" : "outline-dark"
                       }
                       onClick={() => toggleEditable(idx)}
-                      disabled={isModerator && idx < entries.length}
+                      disabled={isModerator && idx < entries.length - modYears}
                     >
                       {entry.editable ? <GoCheck /> : <MdEdit />}
                     </Button>
@@ -198,7 +198,7 @@ export default function EditableList({
                       variant="outline-danger"
                       className="ms-2"
                       onClick={() => remove(idx)}
-                      disabled={isModerator && idx < entries.length}
+                      disabled={isModerator && idx < entries.length - modYears}
                     >
                       <MdDelete />
                     </Button>
@@ -220,7 +220,7 @@ export default function EditableList({
       </Table>
 
       <div className="d-flex justify-content-center">
-        <Button className="px-5 py-2 mb-5" variant="primary" onClick={create}>
+        <Button className="px-5 py-2 mb-5" variant="primary" onClick={create} disabled={isModerator}>
           <RiAddCircleFill className="mb-1 me-2" />
           Add
         </Button>

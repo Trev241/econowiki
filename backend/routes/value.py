@@ -18,7 +18,7 @@ from models import (
 @isAuth()
 def get_values(iso_alpha_3_code):
     id = Country.query.filter_by(iso_alpha_3_code=iso_alpha_3_code).one().id
-    values = CountryIndicatorValue.query.filter_by(country_id=id).all()
+    values = CountryIndicatorValue.query.filter_by(country_id=id).order_by(CountryIndicatorValue.year.asc()).all()
 
     data = OrderedDict(
         (
