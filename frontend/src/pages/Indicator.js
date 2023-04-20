@@ -41,10 +41,10 @@ export default function Indicator() {
       try {
         // Make API request
         method === "PUT"
-          ? cAxios.put(api_endpoint, entries[index])
-          : cAxios.post(api_endpoint, entries[index]);
+          ? await cAxios.put(api_endpoint, entries[index])
+          : await cAxios.post(api_endpoint, entries[index]);
       } catch (err) {
-        console.error(err);
+        throw new Error(err.response.data.message);
       }
     }
 

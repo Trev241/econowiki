@@ -1,5 +1,7 @@
-from app import app, db
 from flask import jsonify, request
+from sqlalchemy.exc import IntegrityError
+
+from app import app, db
 from middleware import isAuth
 from models import (
     EconomicIndicator,
@@ -23,16 +25,23 @@ def get_indicator(short_name):
 @app.route('/indicator/add', methods=['POST'])
 @isAuth()
 def add_indicator():
-    new_indicator = EconomicIndicator(
-        name=request.json.get('name', None),
-        short_name=request.json.get('short_name', None),
-        description=request.json.get('description', None)
-    )
+    for field in ['name', 'short_name', 'description']:
+        if not request.json[field]:
+            return jsonify({'message': f'Field "{field}" cannot be empty'}), 400
 
-    db.session.add(new_indicator)
-    db.session.commit()
+    try:
+        new_indicator = EconomicIndicator(
+            name=request.json.get('name', None),
+            short_name=request.json.get('short_name', None),
+            description=request.json.get('description', None)
+        )
+        
+        db.session.add(new_indicator)
+        db.session.commit()
 
-    return eco_indicator_schema.jsonify(new_indicator), 200
+        return eco_indicator_schema.jsonify(new_indicator), 200
+    except IntegrityError as e:
+        return jsonify({'message': 'The property "code" must be unique.'}), 400
 
 @app.route('/indicator/update/<id>', methods=['PUT'])
 @isAuth()
