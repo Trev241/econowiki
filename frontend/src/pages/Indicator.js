@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Container from "react-bootstrap/Container";
 import { AiOutlineLineChart } from "react-icons/ai";
 import EditableList from "../components/EditableList";
-import { cAxios } from "../constants";
+import { UserType, cAxios } from "../constants";
+import { AuthContext } from "../components/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 export default function Indicator() {
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [indicators, setIndicators] = useState();
 
   useEffect(() => {
@@ -58,6 +63,12 @@ export default function Indicator() {
 
     return true;
   };
+
+  useEffect(() => {
+    if (user.type === UserType.MEMBER) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   return (
     indicators && (

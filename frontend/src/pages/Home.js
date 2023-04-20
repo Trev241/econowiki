@@ -72,7 +72,7 @@ export default function Home() {
                   </option>
                   {countries &&
                     countries.map((country) => (
-                      <option value={country.iso_alpha_3_code}>
+                      <option key={country.iso_alpha_3_code} value={country.iso_alpha_3_code}>
                         {country.name}
                       </option>
                     ))}
@@ -173,11 +173,7 @@ export default function Home() {
                       },
                     }}
                     fill={SELECTED_GEO_FILL}
-                    onClick={() => {
-                      if (user) {
-                        navigate(`/${country?.iso_alpha_3_code}`);
-                      }
-                    }}
+                    onClick={() => navigate(user ? `/${country?.iso_alpha_3_code}` : '/login')}
                     onMouseEnter={() => {
                       setCountry(
                         countries.find((c) => c.iso_alpha_3_code === geo.id)

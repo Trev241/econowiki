@@ -153,53 +153,7 @@ export default function Country() {
           />
         </Col>
 
-        <Col sm={8}>
-          {/* <Container fluid>
-            <Row className="text-center d-flex align-items-center justify-content-center m-5">
-              <Col xs={4}>
-                <Container fluid>
-                  <h1
-                    className="display-6"
-                    style={{
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {country.name}
-                  </h1>
-                  <p className="lead">
-                    ({country.iso_alpha_2_code}, {country.iso_alpha_3_code},{" "}
-                    {country.un_code})
-                  </p>
-                </Container>
-              </Col>
-              <Col xs={4}>
-                <Container fluid>
-                  <ComposableMap
-                    className="border border-secondary rounded"
-                    projection="geoMercator"
-                  >
-                    <ZoomableGroup center={center} zoom={zoom}>
-                      <Geographies geography={WORLD_GEO_URL}>
-                        {({ geographies, projection, path }) => {
-                          const geo = geographies.find(
-                            (geo) => geo.id === params.id
-                          );
-                          geoRef.current = { geo, projection, path };
-                          return geo ? (
-                            <Geography key={geo.rsmKey} geography={geo} />
-                          ) : (
-                            <h1>No available map</h1>
-                          );
-                        }}
-                      </Geographies>
-                    </ZoomableGroup>
-                  </ComposableMap>
-                </Container>
-              </Col>
-            </Row>
-          </Container> */}
-
+        <Col sm={9}>
           <Container fluid className="my-5">
             <div className="mb-5">
               <h1>{country.name}</h1>

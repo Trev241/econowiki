@@ -28,6 +28,7 @@ export default function Sidebar({ items }) {
           {Object.keys(items).map(name => (
             // <Link href={`/${page}#${items[name]}`}>{name}</Link>
             <p
+              key={items[name]}
               className="sidebar-item"
               onClick={() => document.getElementById(items[name]).scrollIntoView({behavior: "smooth"})}
             >
