@@ -10,6 +10,7 @@ import { AiFillSave } from "react-icons/ai";
 import { AuthContext } from "../components/AuthProvider";
 import { UserType, modYears } from "../constants";
 import { BiErrorCircle } from "react-icons/bi";
+import Spinner from "react-bootstrap/Spinner";
 
 export const flags = new Set(["edited", "added", "delete", "editable"]);
 export default function EditableList({
@@ -24,6 +25,7 @@ export default function EditableList({
   const [error, setError] = useState('An unexpected error occurred.');
   const [showAlert, setShowAlert] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const { user } = useContext(AuthContext);
   const isModerator = useMemo(() => user.type === UserType.MODERATOR, [user]);
@@ -87,16 +89,19 @@ export default function EditableList({
   };
 
   const handleSave = async () => {
+    setSaving(true);
     let result = false;
+
     try {
       result = await onSave(entries, deletedEntries);
     } catch (error) {
       setError(error.message);
       console.error(error);
     }
-    
+  
     setShowError(!result);
     setShowAlert(!result);
+    setSaving(false);
 
     if (result)
       window.location.reload();
@@ -120,10 +125,10 @@ export default function EditableList({
           className="d-flex align-items-center mb-3"
           variant="warning"
         >
-          <AiFillSave /> &nbsp;&nbsp;&nbsp;You have unsaved changes.
+          <AiFillSave /> &nbsp;&nbsp;&nbsp;You have unsaved changes.&nbsp;
           {deletedEntries.length > 0 && (
             <div>
-              <b>{deletedEntries.length} item(s)</b> will be{" "}
+              <b>{deletedEntries.length} row(s)</b> will be{" "}
               <b>permanently deleted</b> once changes are saved.
             </div>
           )}
@@ -131,8 +136,9 @@ export default function EditableList({
             variant="outline-dark"
             className="ms-auto"
             onClick={handleSave}
+            disabled={saving}
           >
-            Save
+            {saving ? <Spinner /> : "Save"}
           </Button>
         </Alert>
       </div>
