@@ -173,11 +173,7 @@ export default function Home() {
                       },
                     }}
                     fill={SELECTED_GEO_FILL}
-                    onClick={() => {
-                      if (user) {
-                        navigate(`/${country?.iso_alpha_3_code}`);
-                      }
-                    }}
+                    onClick={() => navigate(user ? `/${country?.iso_alpha_3_code}` : '/login')}
                     onMouseEnter={() => {
                       setCountry(
                         countries.find((c) => c.iso_alpha_3_code === geo.id)
