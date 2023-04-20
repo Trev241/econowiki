@@ -4,7 +4,7 @@ import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { MdFormatListNumbered } from "react-icons/md";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
 import Spinner from "../components/Spinner";
 import { cAxios, UserType } from "../constants";
@@ -98,8 +98,22 @@ export default function CountryEdit() {
   );
 
   const handleSave = async (entries, deletedEntries) => {
+    const years = new Set();
+    
     // First, save editions/additions to database
     for (let idx = 0; idx < entries.length; idx++) {
+      // Validate year and then add to set. Necessary for later to check for duplicates
+      const year = entries[idx].year;
+      
+      // Refuse invalid years
+      if (!isInteger(year) || year < 1000 || year > 2999)
+        throw new Error(`Failed to save changes. Year is invalid in row ${idx + 1}.`);
+      if (years.has(year))
+      
+      // Refuse duplicate years
+        throw new Error(`Failed to save changes. Year ${year} was repeated for more than one row.`);
+      years.add(year);
+
       // Ignore entries that have not been edited and created
       if (!entries[idx].edited && !entries[idx].added) continue;
 
@@ -180,6 +194,10 @@ export default function CountryEdit() {
       ); // ...and ensure strings of whitespace fail
   }, []);
 
+  const isInteger = useCallback((str) => {
+    return /^\+?(0|[1-9]\d*)$/.test(str);
+  }, []);
+
   return (
     <Container fluid className="px-3">
       <div className="my-5">
@@ -233,6 +251,7 @@ export default function CountryEdit() {
             "Year",
             ...Object.keys(indicators).map((id) => indicators[id].short_name),
           ]}
+          uneditableProps={new Set(['year'])}
           onSave={handleSave}
         />
       ) : (

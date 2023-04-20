@@ -17,6 +17,7 @@ export default function EditableList({
   data,
   defaultEntry,
   entryPropNames,
+  uneditableProps,
   onSave,
 }) {
   const [entries, setEntries] = useState(data);
@@ -170,7 +171,7 @@ export default function EditableList({
                   .filter((key) => !flags.has(key))
                   .map((attr) => (
                     <td key={attr} className="align-middle p-3">
-                      {entry.editable ? (
+                      {entry.editable && (!uneditableProps.has(attr) || entry.added) ? (
                         <Form.Control
                           id={idx + attr}
                           name={attr}
