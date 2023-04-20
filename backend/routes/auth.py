@@ -13,6 +13,7 @@ from models import (
     User,
     user_schema
 )
+import os
 
 @app.route('/auth/signin', methods=['POST'])
 @isNotAuth()
@@ -86,7 +87,7 @@ def create_user():
         for admin in admins:
             body = f'''
                 <p>Hello <b>ADMIN @{admin.username}</b>, a new user has signed up, visit the dashboard to accept/reject the user!</p>
-                <span>DASHBOARD: <a href="http://localhost:3000/dashboard">http://localhost:3000/dashboard</a></span>
+                <span>DASHBOARD: <a href="${os.getenv('FRONTEND')}/dashboard">${os.getenv('FRONTEND')}/dashboard</a></span>
                 <br />
                 <span>MEMBER: <b>@{user.username}</b></span>
             '''

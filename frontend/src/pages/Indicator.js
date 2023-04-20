@@ -11,28 +11,23 @@ export default function Indicator() {
   const navigate = useNavigate();
 
   const [indicators, setIndicators] = useState();
-  
+
   useEffect(() => {
     (async () => {
       try {
-        let response;
-        
-        response = await fetch(`http://localhost:5001/indicator`, {
-          credentials: 'include'
-        })
-        const _indicators = await response.json();
-        setIndicators(_indicators);
+        const response = await cAxios.get("/indicator");
+        setIndicators(response.data);
       } catch (err) {
         console.error(err);
       }
     })();
-  }, [])
+  }, []);
 
   const handleSave = async (entries, deletedEntries) => {
     // Save changes to database
     for (let index = 0; index < entries.length; index++) {
       // Choose API endpoint and method. If the entry was neither edited nor was it an addition then ignore
-      let api_endpoint = "http://localhost:5001/indicator/";
+      let api_endpoint = "/indicator/";
       let method;
 
       if (entries[index].edited) {
@@ -41,17 +36,13 @@ export default function Indicator() {
       } else if (entries[index].added) {
         api_endpoint += `add`;
         method = "POST";
-      } else 
-        continue;
-      
+      } else continue;
+
       try {
         // Make API request
-        await fetch(api_endpoint, {
-          method: method,
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(entries[index])
-        })
+        method === "PUT"
+          ? cAxios.put(api_endpoint, entries[index])
+          : cAxios.post(api_endpoint, entries[index]);
       } catch (err) {
         console.error(err);
       }
@@ -60,16 +51,18 @@ export default function Indicator() {
     // Commit deletions to database
     for (let index = 0; index < deletedEntries.length; index++) {
       try {
-        await cAxios.delete(`http://localhost:5001/indicator/${deletedEntries[index].id}`)
+        await cAxios.delete(
+          `http://localhost:5001/indicator/${deletedEntries[index].id}`
+        );
       } catch (err) {
-        if (err.response.status === 400) 
+        if (err.response.status === 400)
           throw new Error(err.response.data.message);
         console.error(err);
       }
     }
 
     return true;
-  }
+  };
 
   useEffect(() => {
     if (user.type === UserType.MEMBER) {
@@ -81,27 +74,27 @@ export default function Indicator() {
     indicators && (
       <Container fluid className="my-5 px-3">
         <div className="d-flex">
-          <AiOutlineLineChart className="display-5" />&nbsp;&nbsp;
+          <AiOutlineLineChart className="display-5" />
+          &nbsp;&nbsp;
           <h1>Economic Indicators</h1>
         </div>
         <p className="lead mb-5">
-          A comprehensive list of all economic indicators used on this site accompanied by a short description.
-          All countries are measured using these very indicators.
+          A comprehensive list of all economic indicators used on this site
+          accompanied by a short description. All countries are measured using
+          these very indicators.
         </p>
 
-        <EditableList 
-          data={indicators} 
+        <EditableList
+          data={indicators}
           defaultEntry={{
             name: "",
             short_name: "",
-            description: ""
-          }} 
-          entryPropNames={[
-            "Name", "Code", "Description"
-          ]}
+            description: "",
+          }}
+          entryPropNames={["Name", "Code", "Description"]}
           onSave={handleSave}
         />
       </Container>
     )
-  )
+  );
 }
