@@ -4,7 +4,7 @@ import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { MdFormatListNumbered } from "react-icons/md";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
 import Spinner from "../components/Spinner";
 import { cAxios, UserType } from "../constants";
@@ -178,10 +178,6 @@ export default function CountryEdit() {
       ); // ...and ensure strings of whitespace fail
   }, []);
 
-  if (!values || !countries || !indicators || !country) {
-    return <Spinner />;
-  }
-
   return (
     <Container fluid className="px-3">
       <div className="my-5">
@@ -189,7 +185,10 @@ export default function CountryEdit() {
           <MdFormatListNumbered className="display-5" />&nbsp;&nbsp;
           <h1>Values</h1>
         </div>
-        <p className="lead">A list of all the values of every country recorded under each indicator.</p>
+        <p className="lead">
+          A list of all the values of every country recorded under each indicator.
+          Click <Link to={`/${country?.iso_alpha_3_code}`}>here</Link> to see these values as charts.
+        </p>
 
         <Form.Group
           as={Row}
@@ -198,11 +197,11 @@ export default function CountryEdit() {
         >
           <Col sm={6} className="">
             <Form.Select
-              value={searchParams.get("country")}
+              value={searchParams.get("country") || "prompt"}
               onChange={updateCountryFilter}
             >
-              <option>-Select a country-</option>
-              {countries.map((country) => (
+              <option disabled value="prompt">- Select a country -</option>
+              {countries?.map((country) => (
                 <option
                   value={country.iso_alpha_3_code}
                   key={country.iso_alpha_3_code}
@@ -213,8 +212,12 @@ export default function CountryEdit() {
             </Form.Select>
           </Col>
         </Form.Group>
+
       </div>
       
+      <p className="text-end text-muted">
+        Units used are described in the description section of the <Link to="/indicators">Economic Indicators</Link> page.
+      </p>
       {!loading ? ( 
         <EditableList
           data={formattedData}

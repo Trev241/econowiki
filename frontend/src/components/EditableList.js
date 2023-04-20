@@ -104,7 +104,7 @@ export default function EditableList({
 
   return (
     <>
-      <div className="my-5">
+      <div>
         <Alert
           show={showError}
           variant="danger"
