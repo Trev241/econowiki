@@ -4,7 +4,7 @@ import { AiOutlineLineChart } from "react-icons/ai";
 import EditableList from "../components/EditableList";
 import { UserType, cAxios } from "../constants";
 import { AuthContext } from "../components/AuthProvider";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Indicator() {
   const { user } = useContext(AuthContext);
@@ -84,6 +84,9 @@ export default function Indicator() {
           these very indicators.
         </p>
 
+        <p className="text-end text-muted">
+          <i>Records can be viewed on the <Link to="/values">Values</Link> page.</i>
+        </p>
         <EditableList
           data={indicators}
           defaultEntry={{
@@ -91,6 +94,7 @@ export default function Indicator() {
             short_name: "",
             description: "",
           }}
+          uneditableProps={new Set()}
           entryPropNames={["Name", "Code", "Description"]}
           onSave={handleSave}
         />

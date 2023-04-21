@@ -4,7 +4,7 @@ import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { MdFormatListNumbered } from "react-icons/md";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
 import Spinner from "../components/Spinner";
 import { cAxios, UserType } from "../constants";
@@ -235,8 +235,12 @@ export default function CountryEdit() {
             </Form.Select>
           </Col>
         </Form.Group>
+
       </div>
 
+      <p className="text-muted text-end">
+        <i>Units used are described on the <Link to="/indicators">Economic Indicators</Link> page.</i>
+      </p>
       {!loading ? (
         <EditableList
           data={formattedData}
