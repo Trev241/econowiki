@@ -3,9 +3,7 @@ import axios from "axios";
 export const isDev = process.env.NODE_ENV === "development";
 
 export const cAxios = axios.create({
-  baseURL: isDev
-    ? "http://localhost:5001"
-    : "https://monstadev13.pythonanywhere.com",
+  baseURL: isDev ? "http://localhost:5001" : "https://econowiki.onrender.com",
   withCredentials: true,
 });
 
